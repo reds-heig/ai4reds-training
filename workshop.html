@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<title>AI4REDS — How it works (workshop companion)</title>
+<style>
+:root{
+  --bg:#0b1220; --card:#111a2c; --card2:#0d1524; --border:#243352;
+  --fg:#e8edf7; --muted:#8b98b8;
+  --amber:#fbbf24; --indigo:#818cf8; --green:#34d399; --sky:#38bdf8;
+  --pink:#f472b6; --violet:#a78bfa; --red:#f87171; --slate:#94a3b8; --teal:#2dd4bf;
+}
+@media (prefers-color-scheme: light){
+  :root:not(.force-dark){
+    --bg:#f4f6fb; --card:#ffffff; --card2:#edf1f9; --border:#d3dbeb;
+    --fg:#1a2233; --muted:#5b6579;
+    --amber:#b45309; --indigo:#4f46e5; --green:#047857; --sky:#0369a1;
+    --pink:#be185d; --violet:#6d28d9; --red:#be123c; --slate:#475569; --teal:#0f766e;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;font-size:15px;line-height:1.5}
+.mono{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 24px 60px}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:27px;margin:6px 0 10px;letter-spacing:-.01em}
+.pill{display:inline-block;font-size:13px;color:var(--muted);border:1px solid var(--border);
+  border-radius:999px;padding:5px 14px;background:color-mix(in srgb, var(--card) 60%, transparent)}
+.pill b{color:var(--fg);font-weight:600}
+.tabs{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
+.tab{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;font-size:13.5px;font-family:inherit}
+.tab:hover{color:var(--fg)}
+.tab.on{background:color-mix(in srgb, var(--indigo) 18%, transparent);color:var(--fg);
+  border-color:color-mix(in srgb, var(--indigo) 55%, transparent)}
+.view{display:none}
+.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:14px}
+.card h3{margin:0 0 4px;font-size:15.5px}
+.kt{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+.kt b{color:var(--fg);font-weight:600}
+.note{font-size:12px;color:var(--muted);margin:12px 0 0}
+.btn{font-family:inherit;font-size:13px;color:var(--fg);background:var(--card2);
+  border:1px solid var(--border);border-radius:9px;padding:7px 13px;cursor:pointer}
+.btn:hover{border-color:var(--indigo)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:color-mix(in srgb, var(--indigo) 22%, transparent);border-color:color-mix(in srgb, var(--indigo) 60%, transparent)}
+.btn.ghost{background:transparent}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+/* SVG shared */
+svg{display:block;width:100%;height:auto}
+.box{fill:var(--card2);stroke:var(--border);stroke-width:1.5;transition:stroke .15s,stroke-width .15s}
+.nd{cursor:pointer}
+.nd:hover .box,.nd:focus .box,.nd.sel .box{stroke:var(--indigo);stroke-width:2.5}
+.t1{fill:var(--fg);font-size:15px;font-weight:600}
+.t2{fill:var(--muted);font-size:12px}
+.elbl{fill:var(--muted);font-size:11.5px}
+.lk{stroke:var(--border);stroke-width:1.5;fill:none}
+.lk.dash{stroke-dasharray:5 5;stroke:var(--violet)}
+.pipe{stroke:color-mix(in srgb, var(--sky) 30%, transparent);stroke-width:12;fill:none;stroke-linecap:round}
+.bNet{fill:color-mix(in srgb, var(--violet) 9%, transparent);stroke:var(--violet);stroke-dasharray:6 6;stroke-width:1.5}
+.bServer{fill:color-mix(in srgb, var(--indigo) 6%, transparent);stroke:var(--border);stroke-width:1.5}
+.bYou{stroke:color-mix(in srgb, var(--amber) 65%, var(--border))}
+.bModel{stroke:color-mix(in srgb, var(--indigo) 65%, var(--border))}
+.bHarn{stroke:color-mix(in srgb, var(--green) 65%, var(--border))}
+.bTools{stroke:color-mix(in srgb, var(--sky) 65%, var(--border))}
+.bCtx{stroke:color-mix(in srgb, var(--violet) 65%, var(--border))}
+.bRepos{stroke:color-mix(in srgb, var(--teal) 65%, var(--border))}
+.ed{stroke:var(--border);stroke-width:2;fill:none;transition:stroke .2s}
+.ed.gate{stroke:var(--pink);stroke-dasharray:6 6}
+.ed.on{stroke:var(--indigo);stroke-width:3;stroke-dasharray:7 7;animation:dashmove .8s linear infinite}
+.ed.on.gate{stroke:var(--pink)}
+.ln.on .box{stroke-width:3}
+.ln.on .bYou{stroke:var(--amber);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--amber) 55%, transparent))}
+.ln.on .bModel{stroke:var(--indigo);filter:drop-shadow(0 0 9px color-mix(in srgb, var(--indigo) 55%, transparent))}
+.ln.on .bHarn{stroke:var(--green);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--green) 55%, transparent))}
+.ln.on .bTools{stroke:var(--sky);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--sky) 55%, transparent))}
+.ln.on .bCtx{stroke:var(--violet);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--violet) 55%, transparent))}
+.gatedot{fill:var(--border)}
+.gatedot.alert{fill:var(--pink);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{r:6}50%{r:9}}
+@keyframes dashmove{to{stroke-dashoffset:-28}}
+.detail{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;min-height:74px}
+.detail .dh{font-size:14px;font-weight:600;margin-bottom:3px}
+.detail .dh span{font-size:11px;color:var(--muted);font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+.detail p{margin:0;font-size:13.5px;color:var(--muted)}
+.detail p b{color:var(--fg);font-weight:600}
+/* loop layout */
+.loopgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+@media(max-width:900px){.loopgrid{grid-template-columns:1fr}}
+.term{background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  height:470px;overflow-y:auto;padding:12px 14px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:13.5px;line-height:1.7}
+.tl{display:flex;gap:9px;margin-bottom:9px;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tg{flex:none;min-width:66px;text-align:center;border-radius:6px;padding:1px 8px;font-size:10.5px;
+  font-weight:700;letter-spacing:.05em;align-self:flex-start;margin-top:2px}
+.tg.you{background:color-mix(in srgb, var(--amber) 16%, transparent);color:var(--amber)}
+.tg.model{background:color-mix(in srgb, var(--indigo) 16%, transparent);color:var(--indigo)}
+.tg.harness{background:color-mix(in srgb, var(--green) 16%, transparent);color:var(--green)}
+.tg.tool{background:color-mix(in srgb, var(--sky) 16%, transparent);color:var(--sky)}
+.tg.gate{background:color-mix(in srgb, var(--pink) 16%, transparent);color:var(--pink)}
+.tt{color:var(--fg)}
+.tt.dim{color:color-mix(in srgb, var(--fg) 45%, var(--muted))}
+.gatebar{display:none;margin-top:10px;border:1px solid color-mix(in srgb, var(--pink) 55%, transparent);
+  background:color-mix(in srgb, var(--pink) 10%, transparent);border-radius:10px;padding:10px 12px;
+  font-size:13px;align-items:center;gap:10px;flex-wrap:wrap}
+.gatebar.on{display:flex}
+.ctxtrack{fill:var(--border);opacity:.5}
+.ctxfill{fill:var(--violet)}
+.status{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* section 4 : skills */
+.skillsgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:900px){.skillsgrid{grid-template-columns:1fr}}
+.skcard{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  background:var(--card2);opacity:.75;transition:opacity .25s,border-color .25s,box-shadow .25s}
+.skcard.hit{opacity:1;border-color:var(--indigo);box-shadow:0 0 14px color-mix(in srgb, var(--indigo) 28%, transparent)}
+.skcard.dead{opacity:.4}
+.skname{font-size:13px;font-weight:700}
+.skdesc{font-size:12px;color:var(--muted);margin-top:3px}
+.sktok{font-size:11px;color:var(--muted);margin-top:3px;opacity:.8}
+.skload{display:inline-block;margin-top:7px;font-size:11px;font-weight:700;color:var(--indigo);
+  background:color-mix(in srgb, var(--indigo) 15%, transparent);padding:2px 9px;border-radius:999px}
+.sknear{display:inline-block;margin-top:7px;font-size:11px;font-weight:700;color:var(--amber);
+  background:color-mix(in srgb, var(--amber) 14%, transparent);padding:2px 9px;border-radius:999px}
+.skfree{flex:1;min-width:150px;font-family:inherit;font-size:13px;color:var(--fg);background:var(--card2);
+  border:1px solid var(--border);border-radius:9px;padding:7px 11px}
+.skstatus{font-size:13px;margin:10px 0 8px;min-height:38px}
+.skstatus b{font-weight:600}
+.skbody{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.65;color:var(--muted);
+  min-height:96px;margin-bottom:12px}
+.skbody .bt{color:var(--fg);font-weight:700;font-size:12.5px;margin-bottom:5px}
+.skcbar{margin-top:6px}
+.soulqa{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:12px}
+.soulq{font-size:13px;color:var(--muted);margin-bottom:10px}
+.soulq b{color:var(--fg)}
+.soula{font-size:13.5px;line-height:1.6;animation:fadein .35s ease;border-left:3px solid var(--indigo);padding-left:12px}
+/* section 5 : framing + security */
+.framgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:900px){.framgrid{grid-template-columns:1fr}}
+.frm{display:block;font-size:13px;color:var(--muted);margin-bottom:9px;cursor:pointer;line-height:1.45}
+.frm b{color:var(--fg)}
+.frm input{accent-color:var(--indigo);margin-right:7px}
+.pprev{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.75;min-height:110px;color:var(--muted)}
+.pprev .pl{display:block}
+.pprev .pl b{color:var(--fg)}
+.frampill{margin-top:10px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;display:inline-block}
+.frampill.bad{color:var(--red);background:color-mix(in srgb, var(--red) 12%, transparent)}
+.frampill.mid{color:var(--amber);background:color-mix(in srgb, var(--amber) 12%, transparent)}
+.frampill.good{color:var(--green);background:color-mix(in srgb, var(--green) 12%, transparent)}
+.planbox{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+  font-size:13px;line-height:1.65;min-height:230px}
+.pln{margin-bottom:9px;animation:fadein .3s ease}
+.pln.ramble{color:var(--muted);font-style:italic;border-left:3px solid var(--red);padding-left:11px}
+.pln.ok{border-left:3px solid var(--green);padding-left:11px}
+.pln.ok i{font-style:normal;font-weight:700;color:var(--green);margin-right:7px}
+.seczone{fill:color-mix(in srgb, var(--indigo) 5%, transparent);stroke:var(--border)}
+.seczExt{fill:color-mix(in srgb, var(--violet) 8%, transparent);stroke:var(--violet);stroke-dasharray:6 6}
+.secb{fill:var(--card2);stroke:var(--border);stroke-width:1.5}
+.bline{stroke:var(--red);stroke-width:1.5;stroke-dasharray:7 5}
+.glow{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 4;opacity:0;transition:opacity .25s}
+.glow.on{opacity:.9}
+.ed2{stroke:var(--border);stroke-width:2;fill:none;opacity:.5;transition:opacity .25s,stroke .25s}
+.ed2.on{opacity:1;stroke:var(--indigo);stroke-width:3}
+.ed2.xb.on{stroke:var(--violet)}
+.secbtns .btn.on{background:color-mix(in srgb, var(--indigo) 18%, transparent);border-color:color-mix(in srgb, var(--indigo) 55%, transparent);color:var(--fg)}
+.bbadge{font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:999px}
+.bbadge.yes{color:var(--red);background:color-mix(in srgb, var(--red) 13%, transparent)}
+.bbadge.no{color:var(--green);background:color-mix(in srgb, var(--green) 13%, transparent)}
+
+/* context section */
+.cbar{display:flex;height:40px;border-radius:9px;overflow:hidden;border:1px solid var(--border);
+  background:var(--card2);margin-top:4px}
+.seg{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.92);
+  font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap;overflow:hidden;min-width:0}
+@media (prefers-color-scheme: light){.seg{color:rgba(255,255,255,.96)}}
+.sgSys{background:#64748b}
+.sgSkills{background:var(--teal)}
+.sgConv{background:var(--amber)}
+.sgTool{background:var(--sky)}
+.sgFree{background:transparent}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.cstat{margin-top:8px;font-size:13px}
+.comp{display:none;margin-top:12px;border:1px solid color-mix(in srgb, var(--violet) 55%, transparent);
+  background:color-mix(in srgb, var(--violet) 10%, transparent);border-radius:10px;padding:10px 14px;font-size:13px;align-items:center;gap:10px}
+.comp.on{display:flex}
+.nineb{font-size:11px;font-weight:700;letter-spacing:.05em;padding:2px 9px;border-radius:999px;
+  background:color-mix(in srgb, var(--violet) 20%, transparent);color:var(--violet)}
+.chk{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.lim{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.lim input{accent-color:var(--indigo);width:130px}
+.toolbar{margin-bottom:14px}
+</style>
+<script>if(new URLSearchParams(location.search).has("dark"))document.documentElement.classList.add("force-dark");</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">AI4REDS &middot; workshop companion &middot; 01-intro</div>
+  <h1>How Ernesto works</h1>
+  <div class="pill">The model <b>proposes</b>. The harness <b>executes</b>. The context is the memory &mdash; and it is <b>finite</b>.</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab on" data-v="arch">1 &middot; Architecture</button>
+  <button class="tab" data-v="loop">2 &middot; The agent loop</button>
+  <button class="tab" data-v="ctx">3 &middot; The context window</button>
+  <button class="tab" data-v="skills">4 &middot; Skills &amp; persona</button>
+  <button class="tab" data-v="sec">5 &middot; Prompts &amp; security</button>
+</nav>
+
+<!-- ============ SECTION 1 : ARCHITECTURE ============ -->
+<section class="view on" id="v-arch">
+  <div class="card">
+    <h3>The infrastructure in three parts</h3>
+    <p class="kt"><b>Your machine</b> + <b>the AI server</b> (REDS) + <b>shared repositories</b>. Click any node; press <b>play</b> to watch a request travel.</p>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn primary" id="archPlay">&#9654; Play a request</button>
+      <span class="note" style="margin:0" id="archStatus">Request: chat with the main model &rarr; then a web search through searxng/firecrawl.</span>
+    </div>
+    <svg id="svgArch" viewBox="0 0 1120 600" role="img" aria-label="AI4REDS architecture diagram">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <!-- base routes (hidden geometry for packets) -->
+      <path id="pMain" class="lk" d="M342 410 H712 V180 H724" style="opacity:.35"/>
+      <path id="pComp" class="lk" d="M342 410 H712 V280 H724" style="opacity:.35"/>
+      <path id="pWeb"  class="lk" d="M342 410 H712 V380 H724" style="opacity:.35"/>
+      <path id="pRepo" class="lk" d="M190 154 V314" marker-end="url(#arw)"/>
+      <path id="pNet"  class="lk dash" d="M890 424 V514" marker-end="url(#arw)"/>
+      <!-- tunnel pipe -->
+      <path class="pipe" d="M342 410 H700"/>
+      <g class="nd" data-node="tunnel" tabindex="0">
+        <rect x="348" y="388" width="350" height="44" fill="transparent"/>
+        <text class="elbl" x="523" y="378" text-anchor="middle">SSH tunnel (localhost only)</text>
+      </g>
+      <!-- internet -->
+      <g class="nd" data-node="net" tabindex="0">
+        <ellipse class="bNet" cx="890" cy="560" rx="165" ry="40"/>
+        <text class="t1" x="890" y="556" text-anchor="middle" style="font-size:14px">Internet</text>
+        <text class="t2" x="890" y="576" text-anchor="middle">only the web services touch this</text>
+      </g>
+      <!-- repos -->
+      <g class="nd" data-node="repos" tabindex="0">
+        <rect class="box bRepos" x="40" y="40" width="300" height="112" rx="12"/>
+        <text class="t1" x="60" y="72">Shared repositories (GitLab)</text>
+        <text class="t2" x="60" y="96">config &middot; skills &middot; monitoring</text>
+        <text class="t2" x="60" y="116">institute-wide, one install script</text>
+      </g>
+      <!-- server -->
+      <rect class="bServer" x="700" y="80" width="380" height="420" rx="14"/>
+      <text class="t1" x="724" y="116" style="font-size:14px">AI server (REDS)</text>
+      <g class="nd" data-node="main" tabindex="0">
+        <rect class="box bModel" x="726" y="140" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="172" style="font-size:14px">Main model</text>
+        <text class="t2" x="746" y="196">vLLM &middot; Qwen3.8-27B</text>
+      </g>
+      <g class="nd" data-node="comp" tabindex="0">
+        <rect class="box" x="726" y="240" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="272" style="font-size:14px">Compression model</text>
+        <text class="t2" x="746" y="296">vLLM &middot; Qwen3.5-9B &middot; summarizes old turns</text>
+      </g>
+      <g class="nd" data-node="web" tabindex="0">
+        <rect class="box bTools" x="726" y="340" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="372" style="font-size:14px">Web search + extract</text>
+        <text class="t2" x="746" y="396">searxng &middot; firecrawl &middot; queries the Internet</text>
+      </g>
+      <!-- laptop -->
+      <g class="nd" data-node="laptop" tabindex="0">
+        <rect class="box bYou" x="40" y="320" width="300" height="160" rx="12"/>
+        <text class="t1" x="60" y="352">Your machine</text>
+        <text class="t2" x="60" y="376">Agent harness (your interface)</text>
+        <text class="t2" x="60" y="396">your SOUL.md (persona)</text>
+        <text class="t2" x="60" y="416">installed skills</text>
+        <text class="t2" x="60" y="436">files &middot; terminal &middot; web tools</text>
+      </g>
+      <!-- packets -->
+      <g id="pkLayer"></g>
+    </svg>
+    <div class="detail" id="archDetail">
+      <div class="dh">Click a node <span>detail panel</span></div>
+      <p>Each node is a real part of the AI4REDS stack. Select one to see what it does and where it runs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 2 : AGENT LOOP ============ -->
+<section class="view" id="v-loop">
+  <div class="card">
+    <h3>The agent loop &mdash; one turn, step by step</h3>
+    <p class="kt">The model <b>cannot act</b>. It reads context, <b>proposes</b> an action, the harness checks and executes it, and the result re-enters the context. Press <b>play</b> or <b>step</b>. At the approval gate, the choice is yours.</p>
+    <div class="loopgrid">
+      <div>
+        <svg id="svgLoop" viewBox="0 0 640 560" role="img" aria-label="Agent loop diagram">
+          <defs>
+            <marker id="arw2" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+            </marker>
+          </defs>
+          <path id="eYou"  class="ed" d="M320 98 V194" marker-end="url(#arw2)"/>
+          <path id="eProp" class="ed" d="M402 280 H462" marker-end="url(#arw2)"/>
+          <path id="eExec" class="ed" d="M540 344 C556 424 484 466 414 472" marker-end="url(#arw2)"/>
+          <path id="eRes"  class="ed" d="M228 502 C150 508 96 436 96 346" marker-end="url(#arw2)"/>
+          <path id="eCtx"  class="ed" d="M174 280 H236" marker-end="url(#arw2)"/>
+          <path id="eGate" class="ed gate" d="M540 216 C556 118 468 60 414 58" marker-end="url(#arw2)"/>
+          <text class="elbl" x="332" y="150">your prompt</text>
+          <text class="elbl" x="434" y="264" text-anchor="middle">proposes</text>
+          <text class="elbl" x="478" y="436">execute</text>
+          <text class="elbl" x="34" y="452">result = tokens in context</text>
+          <text class="elbl" x="176" y="270">reads</text>
+          <text class="elbl" x="474" y="102">asks approval (side effects)</text>
+          <g id="nYou" class="ln"><rect class="box bYou" x="230" y="22" width="180" height="74" rx="12"/>
+            <text class="t1" x="320" y="54" text-anchor="middle">YOU</text>
+            <text class="t2" x="320" y="74" text-anchor="middle">the engineer</text></g>
+          <g id="nCtx" class="ln"><rect class="box bCtx" x="20" y="218" width="152" height="124" rx="12"/>
+            <text class="t1" x="96" y="248" text-anchor="middle">CONTEXT</text>
+            <text class="t2" x="96" y="266" text-anchor="middle">what the model sees</text>
+            <rect class="ctxtrack" x="36" y="284" width="120" height="8" rx="4"/>
+            <rect id="ctxMiniFill" class="ctxfill" x="36" y="284" width="5" height="8" rx="4"/>
+            <text class="t2" id="ctxMiniTxt" x="96" y="318" text-anchor="middle">1,200 tok</text></g>
+          <g id="nModel" class="ln"><circle class="box bModel" cx="320" cy="280" r="80"/>
+            <text class="t1" x="320" y="266" text-anchor="middle">MODEL</text>
+            <text class="t2" x="320" y="286" text-anchor="middle">Qwen3.8-27B</text>
+            <text class="t2" x="320" y="304" text-anchor="middle">proposes, never acts</text></g>
+          <g id="nHarn" class="ln"><rect class="box bHarn" x="466" y="218" width="150" height="124" rx="12"/>
+            <text class="t1" x="541" y="248" text-anchor="middle">HARNESS</text>
+            <text class="t2" x="541" y="268" text-anchor="middle">Agent</text>
+            <text class="t2" x="541" y="286" text-anchor="middle">checks &middot; executes &middot; gates</text>
+            <circle id="gateDot" class="gatedot" cx="612" cy="224" r="6"/></g>
+          <g id="nTools" class="ln"><rect class="box bTools" x="230" y="464" width="180" height="76" rx="12"/>
+            <text class="t1" x="320" y="496" text-anchor="middle">TOOLS</text>
+            <text class="t2" x="320" y="516" text-anchor="middle">files &middot; terminal &middot; web</text></g>
+        </svg>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="lpPlay">&#9654; Play</button>
+          <button class="btn" id="lpStep">Step</button>
+          <button class="btn ghost" id="lpReset">Reset</button>
+          <span class="sp"></span>
+          <span class="note" style="margin:0">Approvals: manual (AI4REDS default)</span>
+        </div>
+        <div class="status" id="lpStatus">Ready. Press play or step through the turn.</div>
+      </div>
+      <div>
+        <div class="term" id="term"><div class="tl"><span class="tg harness">HARNESS</span><span class="tt dim">Session started. Approvals = manual. Tools: files, terminal, web. Context: 1,200 tokens (system + persona + tool list).</span></div></div>
+        <div class="gatebar" id="gateBar">
+          <span>&#10024; <b>Approval needed:</b> <span class="mono">write_file(&quot;report.md&quot;)</span> &mdash; a file will be created.</span>
+          <span class="sp"></span>
+          <button class="btn primary" id="gYes">Approve</button>
+          <button class="btn" id="gNo">Deny</button>
+        </div>
+      </div>
+    </div>
+    <p class="note">The red dashed edge exists so side effects are impossible without you. Read-only actions auto-approve in the AI4REDS configuration; anything that writes, deletes, or sends data outside must be approved. Deny it and the model re-plans &mdash; the loop handles both paths.</p>
+  </div>
+</section>
+
+<!-- ============ SECTION 3 : CONTEXT WINDOW ============ -->
+<section class="view" id="v-ctx">
+  <div class="card">
+    <h3>The context window &mdash; the model&rsquo;s memory, and it fills up</h3>
+    <p class="kt">Everything the model sees is <b>tokens</b>: the persona, the conversation, every tool result. Add work and watch the bar fill. Fill it &mdash; the compression model takes over. Or keep big results out with a <b>sub-agent</b>.</p>
+    <div class="row toolbar">
+      <button class="btn" data-add="msg">+ user message</button>
+      <button class="btn" data-add="reply">+ long reply</button>
+      <button class="btn" data-add="tool">+ tool result (terminal)</button>
+      <button class="btn" data-add="big">+ big extraction</button>
+      <label class="chk"><input type="checkbox" id="subAg"> route big work through a sub-agent</label>
+      <span class="sp"></span>
+      <label class="lim">limit <input type="range" id="lim" min="8192" max="65536" step="8192" value="32768"> <span id="limTxt" class="mono">32,768</span> tok</label>
+      <button class="btn ghost" id="ctxReset">reset</button>
+    </div>
+    <div class="cbar" id="cbar">
+      <div class="seg sgSys" id="sgSys"></div>
+      <div class="seg sgSkills" id="sgSkills"></div>
+      <div class="seg sgConv" id="sgConv"></div>
+      <div class="seg sgTool" id="sgTool"></div>
+      <div class="seg sgFree" id="sgFree"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#64748b"></i>system + SOUL.md <b>always loaded</b></span>
+      <span><i style="background:var(--teal)"></i>skill descriptions <b>always loaded</b></span>
+      <span><i style="background:var(--amber)"></i>conversation</span>
+      <span><i style="background:var(--sky)"></i>tool results</span>
+      <span><i style="background:transparent;border:1px solid var(--border)"></i>free</span>
+    </div>
+    <div class="cstat mono" id="cstat"></div>
+    <div class="comp" id="compBanner"><span class="nineb">Qwen3.5-9B</span><span>Context full &mdash; the compression model summarizes older turns. Conversation and tool history shrink to summaries; recent work stays intact.</span></div>
+    <p class="note">Illustrative token counts; real sizes depend on the model and the vLLM configuration. The harness re-sends the whole context on every turn &mdash; that is why skill bodies load only when triggered, sub-agents keep big results in their own context, and old turns can be compressed. Every token you save is latency and cost you save on every turn.</p>
+  </div>
+</section>
+
+
+<!-- ============ SECTION 4 : SKILLS & PERSONA ============ -->
+<section class="view" id="v-skills">
+  <div class="card">
+    <h3>Skills load on demand</h3>
+    <p class="kt">Only each skill&rsquo;s <b>description</b> sits in context all the time. The body loads when the task matches. Pick a task &mdash; or type your own.</p>
+    <div class="skillsgrid">
+      <div id="skList">
+        <div class="skcard" data-skill="research-paper-writing">
+          <div class="skname mono">research-paper-writing</div>
+          <div class="skdesc">&ldquo;Use when drafting or revising an ML research paper.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 4,200 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="proposal-drafting">
+          <div class="skname mono">proposal-drafting</div>
+          <div class="skdesc">&ldquo;Use when drafting a proposal section by section.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 3,800 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="presentation-slides-generator">
+          <div class="skname mono">presentation-slides-generator</div>
+          <div class="skdesc">&ldquo;Use when generating a REDS-compliant slide deck.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 2,900 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="asd-ste100">
+          <div class="skname mono">asd-ste100</div>
+          <div class="skdesc">&ldquo;Use when writing technical documentation.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 1,600 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="helpful">
+          <div class="skname mono">helpful <span style="font-weight:400;color:var(--amber)">(bad example)</span></div>
+          <div class="skdesc">&ldquo;A skill for proposals.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 2,100 tok (never loaded)</div>
+        </div>
+      </div>
+      <div>
+        <div class="row" id="skTasks">
+          <button class="btn" data-task="0">Proposal section</button>
+          <button class="btn" data-task="1">ECG paper</button>
+          <button class="btn" data-task="2">CinC slides</button>
+          <button class="btn" data-task="3">Server docs</button>
+          <input class="skfree" id="skFree" placeholder="&hellip;or type a task">
+        </div>
+        <div class="skstatus" id="skStatus">Pick a task. The agent reads every description and decides what to load.</div>
+        <div class="skbody" id="skBody">&mdash; no skill body loaded yet &mdash;</div>
+        <div class="cbar skcbar" style="height:26px">
+          <div class="seg sgSys" id="skcSys"></div>
+          <div class="seg sgSkills" id="skcDesc"></div>
+          <div class="seg sgConv" id="skcLoaded"></div>
+          <div class="seg sgFree" id="skcFree"></div>
+        </div>
+        <div class="cstat mono" id="skcStat" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <p class="note">Simulator rule: 2+ keyword hits &asymp; the agent recognizing its trigger. The real mechanism: the agent reads every description and decides &mdash; so the description must say <b>when</b> the skill applies, written for the agent, not for a human. <b>helpful</b> scores 1 keyword on the proposal task and is close-but-no: one keyword is not a trigger. That is exactly why &ldquo;A skill for proposals&rdquo; never fires.</p>
+  </div>
+  <div class="card">
+    <h3>SOUL.md &mdash; the persona: changes everything, costs every conversation</h3>
+    <p class="kt">Same model, same context, same question. Only the persona file differs.</p>
+    <div class="row" id="soulTog" style="margin-bottom:2px">
+      <button class="btn primary" data-soul="std">Standard: &ldquo;Rigorous, careful collaborator&rdquo;</button>
+      <button class="btn" data-soul="terse">&ldquo;Concise technical expert. No fluff.&rdquo;</button>
+    </div>
+    <div class="soulqa">
+      <div class="soulq"><b>You:</b> &ldquo;Ernesto, the ECG monitor test failed &mdash; can you look?&rdquo;</div>
+      <div class="soula" id="soulA"></div>
+    </div>
+    <p class="note">The agent reads every line of SOUL.md in every conversation &mdash; each line costs context. Keep only rules that must hold at all times; task-specific workflows belong in skills.</p>
+  </div>
+</section>
+
+<!-- ============ SECTION 5 : PROMPTS & SECURITY ============ -->
+<section class="view" id="v-sec">
+  <div class="card">
+    <h3>Framing a prompt &mdash; five levers</h3>
+    <p class="kt">A vague prompt lets the agent invent its own scope. Switch on the levers and watch the plan tighten.</p>
+    <div class="framgrid">
+      <div>
+        <label class="frm"><input type="checkbox" data-f="task"><b>1 &middot; The task</b> &mdash; one sentence, the concrete deliverable</label>
+        <label class="frm"><input type="checkbox" data-f="context"><b>2 &middot; The context</b> &mdash; where the inputs are (point, don&rsquo;t paste)</label>
+        <label class="frm"><input type="checkbox" data-f="constraints"><b>3 &middot; The constraints</b> &mdash; length, structure, style, what not to touch</label>
+        <label class="frm"><input type="checkbox" data-f="success"><b>4 &middot; The success criteria</b> &mdash; how you will know it is done</label>
+        <label class="frm"><input type="checkbox" data-f="guardrails"><b>5 &middot; The guardrails</b> &mdash; what is off-limits, what to do when stuck</label>
+        <div class="pprev" id="pPrev"></div>
+        <div class="frampill bad" id="fPill"></div>
+      </div>
+      <div class="planbox" id="pPlan"></div>
+    </div>
+    <p class="note">When the agent rambles, do not fight it in a long thread: start a fresh session with a framed prompt. For recurring work, stop re-pasting the framing &mdash; write a skill. A skill is a reusable framing prompt.</p>
+  </div>
+  <div class="card">
+    <h3>Where does your data go?</h3>
+    <p class="kt">Click an action. The red dashed line is the REDS boundary &mdash; most arrows never cross it.</p>
+    <svg id="svgSec" viewBox="0 0 1100 470" role="img" aria-label="Data flow and security boundary">
+      <defs>
+        <marker id="arw3" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <rect class="seczone" x="40" y="50" width="300" height="370" rx="14"/>
+      <rect class="seczone" x="450" y="50" width="300" height="370" rx="14"/>
+      <rect class="seczExt" x="820" y="50" width="240" height="370" rx="14"/>
+      <text class="t1" x="190" y="88" text-anchor="middle" style="font-size:14px">Your machine</text>
+      <text class="t1" x="600" y="88" text-anchor="middle" style="font-size:14px">REDS AI server</text>
+      <text class="t1" x="940" y="88" text-anchor="middle" style="font-size:14px">External</text>
+      <rect class="secb" x="70" y="120" width="240" height="70" rx="10"/>
+      <text class="t2" x="190" y="150" text-anchor="middle" style="font-size:13px">Your files</text>
+      <text class="t2" x="190" y="170" text-anchor="middle">code &middot; data &middot; conversation</text>
+      <rect class="secb" x="70" y="230" width="240" height="70" rx="10"/>
+      <text class="t2" x="190" y="260" text-anchor="middle" style="font-size:13px">Terminal</text>
+      <text class="t2" x="190" y="280" text-anchor="middle">commands run locally</text>
+      <rect class="secb" x="480" y="130" width="240" height="70" rx="10"/>
+      <text class="t2" x="600" y="160" text-anchor="middle" style="font-size:13px">Models (vLLM)</text>
+      <text class="t2" x="600" y="180" text-anchor="middle">Qwen3.8-27B &middot; Qwen3.5-9B</text>
+      <rect class="secb" x="480" y="250" width="240" height="70" rx="10"/>
+      <text class="t2" x="600" y="280" text-anchor="middle" style="font-size:13px">searxng &middot; firecrawl</text>
+      <text class="t2" x="600" y="300" text-anchor="middle">web search + extract</text>
+      <rect class="secb" x="850" y="130" width="180" height="70" rx="10"/>
+      <text class="t2" x="940" y="160" text-anchor="middle" style="font-size:13px">Internet</text>
+      <rect class="secb" x="850" y="250" width="180" height="70" rx="10"/>
+      <text class="t2" x="940" y="280" text-anchor="middle" style="font-size:13px">context7 (MCP)</text>
+      <text class="t2" x="940" y="300" text-anchor="middle">library docs, API key</text>
+      <text class="elbl" x="395" y="118" text-anchor="middle">SSH tunnel</text>
+      <text class="elbl" x="395" y="133" text-anchor="middle">(localhost)</text>
+      <line class="bline" x1="790" y1="38" x2="790" y2="452"/>
+      <text x="790" y="30" text-anchor="middle" style="fill:var(--red);font-size:12px;font-weight:600">REDS boundary</text>
+      <path id="pChat" class="ed2" d="M340 165 H474" marker-end="url(#arw3)"/>
+      <path id="pSearch" class="ed2" d="M340 285 H474" marker-end="url(#arw3)"/>
+      <path id="pSearchNet" class="ed2 xb" d="M720 285 H810 V165 H844" marker-end="url(#arw3)"/>
+      <path id="pCtx7" class="ed2 xb" d="M190 420 V452 H940 V326" marker-end="url(#arw3)"/>
+      <rect id="filesGlow" class="glow" x="64" y="114" width="252" height="82" rx="12"/>
+      <rect id="termGlow" class="glow" x="64" y="224" width="252" height="82" rx="12"/>
+    </svg>
+    <div class="row secbtns" id="secActs" style="margin-top:12px">
+      <button class="btn" data-sec="read">Agent reads your code</button>
+      <button class="btn" data-sec="chat">You chat with the model</button>
+      <button class="btn" data-sec="term">Agent runs the terminal</button>
+      <button class="btn" data-sec="web">Agent does a web search</button>
+      <button class="btn" data-sec="ctx7">Agent fetches library docs</button>
+    </div>
+    <div class="detail" id="secDetail">
+      <div class="dh" id="secDh">Click an action <span>data flow</span></div>
+      <p id="secDt">Five everyday actions, one boundary. Watch which arrows cross the red line.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NS="http://www.w3.org/2000/svg";
+const fmt=n=>n.toLocaleString("en-US");
+
+/* ---------- tabs ---------- */
+const tabs=$$("#tabs .tab");
+function showTab(v){
+  tabs.forEach(t=>t.classList.toggle("on",t.dataset.v===v));
+  $$(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+}
+tabs.forEach(t=>t.onclick=()=>showTab(t.dataset.v));
+document.addEventListener("keydown",e=>{
+  if(e.target.closest("input,textarea"))return;
+  if(e.key==="1")showTab("arch"); if(e.key==="2")showTab("loop"); if(e.key==="3")showTab("ctx"); if(e.key==="4")showTab("skills"); if(e.key==="5")showTab("sec");
+});
+
+/* ---------- section 1 : architecture ---------- */
+const ARCH_INFO={
+ repos:{t:"Shared repositories (GitLab)",s:"institute-wide configuration",
+  h:"The <b>config</b> repo holds the standard harness setup and the shared persona (SOUL.md). The <b>skills</b> repo holds task-specific packages everyone can reuse. The <b>monitoring</b> repo runs the observability stack on the AI server. One install script copies what your harness needs &mdash; the AI4REDS team maintains these, you bring use cases."},
+ laptop:{t:"Your machine",s:"where you work",
+  h:"Runs the <b>harness</b> &mdash; your interface to the models. Your SOUL.md, your installed skills, and your conversations live here. Your files and terminal are the tools the agent works with. The models are reached only through the SSH tunnel."},
+ tunnel:{t:"SSH tunnel",s:"first security boundary",
+  h:"A tunnel from your machine to the AI server. The models are <b>not exposed on the network</b>: they are reachable only at localhost through the tunnel. Everything between you and the models stays on this private path."},
+ main:{t:"Main model (vLLM &middot; Qwen3.8-27B)",s:"the brain",
+  h:"vLLM serves the main model. It receives the context the harness assembles and returns the next reply or proposed action. Text in, text out &mdash; billions of numerical parameters. Text in, text out: it cannot touch your files by itself."},
+ comp:{t:"Compression model (vLLM &middot; Qwen3.5-9B)",s:"context janitor",
+  h:"A second vLLM server hosts the compression model. When the conversation grows past the context limit, it <b>summarizes older turns</b> so the main model can keep working (see section 3). Small, fast, dedicated to one job."},
+ web:{t:"Web search + extract (searxng &middot; firecrawl)",s:"the only door to the Internet",
+  h:"Hosted on the AI server. When a task needs outside information, the agent searches with searxng and extracts pages with firecrawl &mdash; <b>that fetched content enters your conversation</b>. Same rule for context7 (MCP): live library documentation, an external service with your API key."},
+ net:{t:"Internet",s:"outside the boundary",
+  h:"Nothing here sees your files, code, or conversations. Only the web services (and anything you explicitly ask to fetch) cross this boundary &mdash; and approval gates cover actions that send institute data outward."}
+};
+const archDetail=$("#archDetail");
+$$(".nd").forEach(g=>{
+  const act=()=>{
+    $$(".nd").forEach(x=>x.classList.remove("sel"));
+    g.classList.add("sel");
+    const d=ARCH_INFO[g.dataset.node];
+    archDetail.innerHTML='<div class="dh">'+d.t+' <span>'+d.s+'</span></div><p>'+d.h+'</p>';
+  };
+  g.addEventListener("click",act);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter")act();});
+});
+
+/* packet timeline */
+let archBusy=false;
+const pkLayer=$("#pkLayer");
+function mkPkt(color){
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r","5.5"); c.setAttribute("fill",color);
+  pkLayer.appendChild(c); return c;
+}
+function movePkt(pathEl,c,fromPct,toPct,t0,t1,dur){
+  const L=pathEl.getTotalLength();
+  return new Promise(res=>{
+    const start=performance.now()+t0;
+    (function frame(now){
+      const p=(now-start)/dur;
+      if(p>=1){res();return;}
+      if(p<0){requestAnimationFrame(frame);return;}
+      const pos=pathEl.getPointAtLength(L*(fromPct+(toPct-fromPct)*p));
+      c.setAttribute("cx",pos.x); c.setAttribute("cy",pos.y);
+      requestAnimationFrame(frame);
+    })(performance.now());
+  });
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function archPlay(){
+  if(archBusy)return; archBusy=true;
+  const st=$("#archStatus");
+  const pMain=$("#pMain"),pWeb=$("#pWeb"),pNet=$("#pNet");
+  const amber="var(--amber)",indigo="var(--indigo)",sky="var(--sky)",violet="var(--violet)";
+  st.textContent="1/4 &mdash; your prompt leaves the machine, over the tunnel, to the main model…";
+  const out=mkPkt(amber);
+  await movePkt(pMain,out,0,1,0,0,1300); out.remove();
+  st.textContent="2/4 &mdash; the model answers. Tokens stream back to your machine.";
+  const ins=[mkPkt(indigo),mkPkt(indigo),mkPkt(indigo)];
+  await Promise.all(ins.map((c,i)=>movePkt(pMain,c,1,0,i*260,0,1100)));
+  ins.forEach(c=>c.remove());
+  st.textContent="3/4 &mdash; the task needs the web. The request goes to searxng/firecrawl…";
+  const w=mkPkt(sky);
+  await movePkt(pWeb,w,0,1,0,0,1200);
+  st.textContent="4/4 &mdash; searxng/firecrawl query the Internet. The result comes back through the tunnel.";
+  const n=mkPkt(violet);
+  await movePkt(pNet,n,0,1,0,0,700);
+  await movePkt(pNet,n,1,0,0,0,700);
+  await movePkt(pWeb,n,1,0,0,0,1300); n.remove(); w.remove();
+  st.textContent="Done. Your files, code and conversation never left REDS. Play again anytime.";
+  archBusy=false;
+}
+$("#archPlay").onclick=archPlay;
+
+/* ---------- section 2 : agent loop ---------- */
+const STEPS=[
+ {sp:"you",tag:"YOU",text:"“Summarize the last 10 commits into report.md.”",n:["nYou"],e:["eYou"],ctx:120,status:"Your prompt enters the context. The model will read everything it sees."},
+ {sp:"model",tag:"MODEL",text:"Reading context (SOUL.md, conversation, tool list). I need the commit list first.",n:["nModel","nCtx"],e:["eCtx"],status:"The model reads the context. It decides, but it cannot act by itself."},
+ {sp:"model",tag:"MODEL",text:"Proposes → terminal(“git log -10 --stat”)",n:["nModel","nHarn"],e:["eProp"],status:"The model proposes an action. It is only a proposal."},
+ {sp:"harness",tag:"HARNESS",text:"Check: read-only command, inside the workspace → auto-approved. Executing…",n:["nHarn","nTools"],e:["eExec"],status:"The harness applies its policy: read-only passes, side effects stop."},
+ {sp:"tool",tag:"TOOL",text:"10 commits · 4 files · 312 insertions(+) — result enters the context (+380 tok)",n:["nTools","nCtx"],e:["eRes","eCtx"],ctx:380,status:"The result comes back as tokens. The context just grew."},
+ {sp:"model",tag:"MODEL",text:"Proposes → write_file(“report.md”, summary) — side effect: creates a file.",n:["nModel","nHarn"],e:["eProp"],status:"Side effect detected. The harness will not execute — it asks you."},
+ {sp:"harness",tag:"HARNESS",text:"Side effect detected. Asking YOU for approval before executing.",n:["nHarn","nYou"],e:["eGate"],gate:true,status:"Approval gate. Nothing runs until you decide."},
+ {sp:"harness",tag:"HARNESS",text:"Approved. Executing write_file(…).",n:["nHarn","nTools"],e:["eExec"],branch:"ok"},
+ {sp:"tool",tag:"TOOL",text:"Wrote 1,204 bytes → report.md (+60 tok)",n:["nTools","nCtx"],e:["eRes","eCtx"],ctx:60,branch:"ok"},
+ {sp:"model",tag:"MODEL",text:"Done. report.md created — 10 commits, 4 files, 312 lines added. Verified the file exists.",n:["nModel","nYou"],e:["eYou"],ctx:90,branch:"ok",end:true,status:"End of turn. The model even verifies its own work before reporting."},
+ {sp:"harness",tag:"HARNESS",text:"Denied. The action is not executed.",n:["nHarn"],e:[],branch:"no"},
+ {sp:"model",tag:"MODEL",text:"Understood — I’ll put the summary in the chat instead, no file write. Here it is…",n:["nModel","nYou"],e:["eYou"],ctx:720,branch:"no",end:true,status:"Denied is fine — the model re-plans around your decision. The loop handles both paths."}
+];
+const term=$("#term"), lpStatus=$("#lpStatus"), gateBar=$("#gateBar"), gateDot=$("#gateDot");
+const CTX_MAX=32768;
+let L={idx:-1,ctx:1200,playing:false,done:false,branch:null,waiting:false};
+function termLine(tag,cls,text,dim){
+  const d=document.createElement("div"); d.className="tl";
+  d.innerHTML='<span class="tg '+cls+'">'+tag+'</span><span class="tt'+(dim?' dim':'')+'"></span>';
+  d.querySelector(".tt").textContent=text;
+  term.appendChild(d); term.scrollTop=term.scrollHeight;
+}
+function setHl(n,e){
+  $$("#svgLoop .ln").forEach(g=>g.classList.remove("on"));
+  $$("#svgLoop .ed").forEach(p=>p.classList.remove("on"));
+  (n||[]).forEach(id=>{const g=$("#"+id); if(g)g.classList.add("on");});
+  (e||[]).forEach(id=>{const p=$("#"+id); if(p)p.classList.add("on");});
+}
+function meter(){
+  const w=Math.max(4,Math.min(120,L.ctx/CTX_MAX*120));
+  $("#ctxMiniFill").setAttribute("width",w);
+  $("#ctxMiniTxt").textContent=fmt(L.ctx)+" tok";
+}
+function finish(){
+  L.done=true; L.playing=false;
+  $("#lpPlay").disabled=true; $("#lpStep").disabled=true;
+  lpStatus.textContent="Turn complete. Reset to run it again — and to try the other branch at the gate.";
+}
+function applyStep(s){
+  L.idx=STEPS.indexOf(s);
+  setHl(s.n,s.e);
+  termLine(s.tag,s.sp=== "harness"?"harness":(s.sp==="model"?"model":(s.sp==="tool"?"tool":"you")),s.text);
+  if(s.ctx){L.ctx+=s.ctx; meter();}
+  if(s.status)lpStatus.textContent=s.status;
+  if(s.gate){
+    L.waiting=true; L.playing=false;
+    gateBar.classList.add("on"); gateDot.classList.add("alert");
+    return "gate";
+  }
+  if(s.end)finish();
+  return "ok";
+}
+function advance(){
+  if(L.done||L.waiting)return;
+  for(let i=L.idx+1;i<STEPS.length;i++){
+    const s=STEPS[i];
+    if(s.branch && !L.branch)continue;
+    if(s.branch && s.branch!==L.branch)continue;
+    if(applyStep(s)==="gate")return;
+    return;
+  }
+  if(L.idx>=0)finish();
+}
+function play(){
+  if(L.done||L.waiting)return;
+  L.playing=true;
+  advance();
+  if(!L.done&&!L.waiting)setTimeout(play,2400);
+}
+function loopReset(){
+  L={idx:-1,ctx:1200,playing:false,done:false,branch:null,waiting:false};
+  term.innerHTML="";
+  termLine("HARNESS","harness","Session started. Approvals = manual. Tools: files, terminal, web. Context: 1,200 tokens (system + persona + tool list).",true);
+  setHl(null,null); gateBar.classList.remove("on"); gateDot.classList.remove("alert");
+  meter(); $("#lpPlay").disabled=false; $("#lpStep").disabled=false;
+  lpStatus.textContent="Ready. Press play or step through the turn.";
+}
+function gateChoice(b){
+  if(!L.waiting)return;
+  L.branch=b; L.waiting=false;
+  gateBar.classList.remove("on"); gateDot.classList.remove("alert");
+  termLine("YOU","you",b==="ok"?"Approve":"Deny");
+  if(L.playing){setTimeout(play,1400);} else {advance();}
+}
+$("#lpPlay").onclick=play;
+$("#lpStep").onclick=advance;
+$("#lpReset").onclick=loopReset;
+$("#gYes").onclick=()=>gateChoice("ok");
+$("#gNo").onclick=()=>gateChoice("no");
+loopReset();
+
+/* ---------- section 3 : context window ---------- */
+const C={sys:1400,skills:350,conv:0,tool:0,limit:32768};
+const ADD={
+  msg:{seg:"conv",tok:140,label:"user message (+140 tok)"},
+  reply:{seg:"conv",tok:1500,label:"long reply (+1,500 tok)"},
+  tool:{seg:"tool",tok:3800,label:"tool result: terminal (+3,800 tok)"},
+  big:{seg:"tool",tok:8000,label:"big extraction (+8,000 tok)"}
+};
+const cstat=$("#cstat"), compBanner=$("#compBanner"), ctxLogEl=null;
+function ctxLog(t){
+  let el=$("#ctxLog");
+  if(!el){el=document.createElement("p"); el.className="note"; el.id="ctxLog";
+    cstat.after(el);}
+  el.textContent=t;
+}
+function ctxTotal(){return C.sys+C.skills+C.conv+C.tool;}
+function ctxRender(){
+  const T=ctxTotal(), L=C.limit;
+  const pct=v=>Math.max(0,Math.min(100,v/L*100));
+  const segs={sgSys:[C.sys,""],sgSkills:[C.skills,""],sgConv:[C.conv,""],sgTool:[C.tool,""],sgFree:[L-T,""]};
+  for(const id in segs){
+    const el=$("#"+id), w=pct(segs[id][0]);
+    el.style.width=w+"%";
+    el.textContent=(w>10&&segs[id][0]>0)?fmt(segs[id][0]):"";
+  }
+  cstat.textContent="used "+fmt(T)+" / "+fmt(L)+" tokens ("+Math.round(T/L*100)+"%) — system "+fmt(C.sys)+" · skills "+fmt(C.skills)+" · conversation "+fmt(C.conv)+" · tools "+fmt(C.tool);
+}
+async function ctxCompress(){
+  compBanner.classList.add("on");
+  $$(".toolbar .btn").forEach(b=>b.disabled=true);
+  C.conv=Math.max(200,Math.round(C.conv*0.35));
+  C.tool=Math.max(200,Math.round(C.tool*0.45));
+  ctxRender();
+  await sleep(1700);
+  compBanner.classList.remove("on");
+  $$(".toolbar .btn").forEach(b=>b.disabled=false);
+}
+async function ctxAdd(kind){
+  const a=ADD[kind];
+  let tok=a.tok;
+  if(kind==="big"&&$("#subAg").checked){tok=250;}
+  if(ctxTotal()+tok>C.limit){
+    ctxLog("Context full → compressed older turns, then added: "+(kind==="big"&&$("#subAg").checked?"sub-agent summary (+250 tok)":a.label));
+    await ctxCompress();
+  } else {
+    ctxLog("Added: "+(kind==="big"&&$("#subAg").checked?"sub-agent summary (+250 tok) — the sub-agent did the work in its own context":a.label));
+  }
+  C[a.seg]+=tok;
+  ctxRender();
+}
+$$(".toolbar [data-add]").forEach(b=>b.onclick=()=>ctxAdd(b.dataset.add));
+$("#subAg").onchange=()=>ctxLog($("#subAg").checked
+  ?"Sub-agent routing ON: big extractions happen in a separate context — only a ~250-token summary comes back."
+  :"Sub-agent routing OFF: the full extraction enters the main context.");
+$("#lim").oninput=e=>{C.limit=+e.target.value; $("#limTxt").textContent=fmt(C.limit); ctxRender();};
+$("#ctxReset").onclick=()=>{C.conv=0;C.tool=0;ctxLog("Reset. Conversation and tool history cleared — system and skill descriptions stay: they load every session.");ctxRender();};
+ctxRender();
+
+
+/* ---------- section 4 : skills ---------- */
+const SKILLS=[
+ {name:"research-paper-writing",body:4200,keys:["paper","revise","research"],
+  sk:["Overview: drafting and revising ML research papers, section by section.","Workflow: 1. Map every claim to evidence. 2. Write with sentence skeletons. 3. Verify each citation.","Pitfall: a claim without evidence gets cut, not padded."]},
+ {name:"proposal-drafting",body:3800,keys:["proposal","section"],
+  sk:["Overview: section-by-section proposal writing with review gates.","Workflow: 1. Grill the evaluation criteria. 2. Validate the plan with a reviewer. 3. Write the section; tone + source review.","Pitfall: never draft before the criteria are fixed."]},
+ {name:"presentation-slides-generator",body:2900,keys:["slides","talk","presentation","deck"],
+  sk:["Overview: REDS-compliant HEIG-VD decks from markdown or a brief.","Workflow: 1. Map content to the 2022 template layouts. 2. Arial + brand colors. 3. Render the .pptx.","Pitfall: the 2022 template layouts are not the 2019 ones."]},
+ {name:"asd-ste100",body:1600,keys:["documentation","manual","docs","doc"],
+  sk:["Overview: ASD-STE100 Simplified Technical English rules.","Workflow: 1. Short sentences (20 procedural / 25 descriptive). 2. Active voice, imperative mood. 3. Approved vocabulary only.","Pitfall: passive voice in procedures is the most common violation."]},
+ {name:"helpful",body:2100,keys:["proposal"],vague:true,
+  sk:["This skill never loads: one keyword in the description is not a trigger the agent can act on."]}
+];
+const SK_LIMIT=32768, SK_SYS=1400, SK_DESC=60, SK_N=SKILLS.length;
+const TASKS=["Draft section 2 of the Innosuisse proposal","Revise the related-work section of the ECG paper","Build the slides for the CinC talk","Write the installation documentation for the GPU server"];
+const skCards=$$("#skList .skcard");
+function skScore(sk,t){let n=0;for(const k of sk.keys)if(t.includes(k))n++;return n;}
+function skRenderCost(loaded){
+  const desc=SK_DESC*SK_N;
+  const total=SK_SYS+desc+loaded;
+  const pct=v=>Math.max(0,Math.min(100,v/SK_LIMIT*100));
+  $("#skcSys").style.width=pct(SK_SYS)+"%";
+  $("#skcDesc").style.width=pct(desc)+"%";
+  $("#skcLoaded").style.width=pct(loaded)+"%";
+  $("#skcFree").style.width=pct(SK_LIMIT-total)+"%";
+  $("#skcStat").textContent="SOUL.md "+fmt(SK_SYS)+" + "+SK_N+" descriptions "+fmt(desc)+" + loaded body "+fmt(loaded)+" = "+fmt(total)+" tok ("+Math.round(total/SK_LIMIT*100)+"% of "+fmt(SK_LIMIT)+")";
+}
+function skRun(task){
+  const t=task.toLowerCase().trim();
+  const scored=SKILLS.map(sk=>({sk,n:skScore(sk,t)}));
+  const best=scored.filter(x=>x.n>=2).sort((a,b)=>b.n-a.n)[0];
+  let near=null;
+  skCards.forEach(c=>{
+    c.classList.remove("hit","dead");
+    const tag=c.querySelector(".skload,.sknear");
+    if(tag)tag.remove();
+    const sk=SKILLS.find(x=>x.name===c.dataset.skill);
+    const n=skScore(sk,t);
+    if(best&&sk.name===best.sk.name){
+      c.classList.add("hit");
+      const b=document.createElement("div");b.className="skload";b.textContent="LOADED +"+fmt(best.sk.body)+" tok";
+      c.appendChild(b);
+    } else if(n===1){
+      near=near||sk;
+      c.classList.add("dead");
+      const b=document.createElement("div");b.className="sknear";b.textContent="1 keyword — not a trigger";
+      c.appendChild(b);
+    } else if(!best){c.classList.add("dead");}
+  });
+  const body=$("#skBody"),st=$("#skStatus");
+  if(best){
+    st.innerHTML="<b>"+best.sk.name+"</b> triggered ("+scored.filter(x=>x.n>=2).length+" match) — its body enters the context.";
+    body.innerHTML='<div class="bt">SKILL.md — '+best.sk.name+' (loaded)</div>'+best.sk.sk.map(l=>l).join("<br>");
+    skRenderCost(best.sk.body);
+  } else {
+    st.innerHTML="No skill triggered. The agent works from general knowledge + your prompt.";
+    body.innerHTML="&mdash; no skill body loaded —";
+    skRenderCost(0);
+  }
+  if(near&&!best){
+    st.innerHTML+=" "+near.name+" scored 1 keyword — not a trigger (the description must say <b>when</b> it applies).";
+  }
+}
+$$("#skTasks [data-task]").forEach(b=>b.onclick=()=>{
+  $$("#skTasks .btn").forEach(x=>x.classList.remove("primary"));
+  b.classList.add("primary");
+  skRun(TASKS[+b.dataset.task]);
+});
+$("#skFree").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.value.trim()){
+    $$("#skTasks .btn").forEach(x=>x.classList.remove("primary"));
+    skRun(e.target.value);
+  }
+});
+skRenderCost(0);
+
+/* SOUL.md persona toggle */
+const SOUL={
+ std:"I will look at it. Plan: (1) reproduce the failure with the latest commit, (2) identify the location and the cause, (3) propose a minimal fix. I will not change anything before you see the plan, and I will report the outcome of each step.",
+ terse:"Reproducing now. Cause: off-by-one in ecg_window.py:42. Fix is one line — show it to you before applying."
+};
+function soulShow(k){
+  $$("#soulTog .btn").forEach(b=>b.classList.toggle("primary",b.dataset.soul===k));
+  const a=$("#soulA");
+  a.style.opacity=0;
+  setTimeout(()=>{a.textContent=SOUL[k];a.style.opacity=1;},150);
+}
+$$("#soulTog .btn").forEach(b=>b.onclick=()=>soulShow(b.dataset.soul));
+soulShow("std");
+
+/* ---------- section 5 : framing ---------- */
+const FRAM={
+ task:{l:"<b>Task:</b> Write section 2 of the proposal into <code>proposal/section2.md</code>.",
+  plan:"Write section 2 of the proposal into <code>proposal/section2.md</code>."},
+ context:{l:"<b>Context:</b> inputs are <code>GUIDELINES.md</code>, <code>EXAMPLES.md</code>, <code>PROJECT_CONTEXT.md</code> (dossier folder).",
+  plan:"Read the three input files. No other sources."},
+ constraints:{l:"<b>Constraints:</b> max 350 words · structure: challenge, approach, plan · ASD-STE100 · do not modify other files.",
+  plan:"Hold to 350 words, three-part structure, ASD-STE100. Touch no other file."},
+ success:{l:"<b>Success:</b> done when it answers the three evaluation criteria and cites only sources in EXAMPLES.md.",
+  plan:"Before finishing, check: three evaluation criteria answered, citations only from EXAMPLES.md. Report the check."},
+ guardrails:{l:"<b>Guardrails:</b> do not commit. If a requirement is missing, stop and ask.",
+  plan:"No git commit. If a requirement is missing, stop and ask — do not assume."}
+};
+const FRAM_ORDER=["task","context","constraints","success","guardrails"];
+const RAMBLE=[
+ "Sure — I could draft the overview, restructure the whole proposal, update the references, adjust the tone…",
+ "Let me assume it is the globalM application and start with the executive summary. Should I check the budget table too? A literature review would help, or keep it short…"
+];
+function framRender(){
+  const on=FRAM_ORDER.filter(k=>document.querySelector('[data-f="'+k+'"]').checked);
+  const prev=$("#pPrev"),plan=$("#pPlan"),pill=$("#fPill");
+  prev.innerHTML=on.length?on.map(k=>'<span class="pl">'+FRAM[k].l+'</span>').join("")
+    :'<span class="pl" style="font-style:italic">&ldquo;help me with my proposal&rdquo;</span>';
+  if(!on.length){
+    plan.innerHTML=RAMBLE.map(l=>'<div class="pln ramble">'+l+'</div>').join("");
+    pill.className="frampill bad";pill.textContent="Unframed: the agent invents scope and assumptions.";
+  } else {
+    plan.innerHTML=on.map((k,i)=>'<div class="pln ok"><i>'+(i+1)+'.</i>'+FRAM[k].plan+'</div>').join("");
+    if(on.length===5){pill.className="frampill good";pill.textContent="Framed: one deliverable, known inputs, checkable done.";
+     plan.innerHTML+='<div class="pln ok" style="border-color:var(--indigo)"><i>✓</i>Ask for verification before the finish: “check that X and Y hold. Report the result.”</div>';}
+    else{pill.className="frampill mid";pill.textContent="Partially framed — the agent still has room to invent.";}}
+}
+$$('.frm input').forEach(i=>i.onchange=framRender);
+framRender();
+
+/* security map */
+const SECA=[
+ {id:"read",label:"Agent reads your code",cross:false,
+  text:"Your files never leave your machine. The model only sees what you send it, as tokens.",hl:["filesGlow"]},
+ {id:"chat",label:"You chat with the model",cross:false,
+  text:"Over the SSH tunnel, entirely inside REDS. The models are not open on the network — reachable only at localhost through the tunnel.",hl:["pChat"]},
+ {id:"term",label:"Agent runs the terminal",cross:false,gate:"approval gate: read-only auto-approves, side effects ask first",
+  text:"Runs on your machine. Read-only commands pass; anything with side effects stops at the approval gate.",hl:["termGlow"]},
+ {id:"web",label:"Agent does a web search",cross:true,
+  text:"searxng + firecrawl (on the AI server) query the Internet. What they fetch enters your conversation — the agent tells you when it does.",hl:["pSearch","pSearchNet"]},
+ {id:"ctx7",label:"Agent fetches library docs",cross:true,
+  text:"context7 (MCP) is an external service, called with your API key, for up-to-date library documentation. Same rule: fetched content enters the conversation.",hl:["pCtx7"]}
+];
+function secRun(id){
+  const a=SECA.find(x=>x.id===id);
+  $$("#secActs .btn").forEach(b=>b.classList.toggle("on",b.dataset.sec===id));
+  $$("#svgSec .ed2, #svgSec .glow").forEach(e=>e.classList.remove("on"));
+  a.hl.forEach(h=>$("#"+h).classList.add("on"));
+  const badge=a.cross
+    ?'<span class="bbadge yes">CROSSES THE REDS BOUNDARY</span>'
+    :'<span class="bbadge no">STAYS INSIDE REDS</span>';
+  $("#secDh").innerHTML=a.label+" <span>"+badge+"</span>";
+  $("#secDt").innerHTML=a.text+(a.gate?" <b style='color:var(--pink)'>"+a.gate+".</b>":"");
+}
+$$("#secActs .btn").forEach(b=>b.onclick=()=>secRun(b.dataset.sec));
+secRun("chat");
+
+
+/* open on a specific tab when embedded (?tab=ctx) */
+const _t=new URLSearchParams(location.search).get("tab");
+if(_t&&document.getElementById("v-"+_t))showTab(_t);
+
+/* test / demo API */
+window.__app={showTab,loopNext:advance,loopReset,ctxAdd,ctxState:()=>({...C,total:ctxTotal()}),skRun,framRender,secRun};
+</script>
+<script>
+/* report my height to the page that embeds me (no inner scroll when embedded) */
+(function(){
+  var embedded = window.top!==window;
+  /* embedded: forbid the inner scrollbar. A native scrollbar takes width,
+     reflows the content taller, and the height fit stops converging. */
+  if(embedded) document.documentElement.style.overflowY="hidden";
+  var last=0;
+  function send(){
+    var h=Math.ceil(document.body.scrollHeight);
+    if(h!==last){
+      last=h;
+      try{ if(embedded) window.top.postMessage({ernestoFit:h},"*"); }catch(e){}
+    }
+  }
+  window.addEventListener("load",send);
+  window.addEventListener("resize",send);
+  new MutationObserver(send).observe(document.body,{childList:true,subtree:true,attributes:true,characterData:true});
+  setInterval(send,1500);
+  send();
+})();
+</script>
+</body>
+</html>

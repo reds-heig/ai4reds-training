@@ -1,0 +1,12 @@
+# Publish the static site on GitLab Pages.
+# The job copies the site files into public/, which GitLab Pages serves.
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp -r index.html workshop.html ernesto-trailer.html assets public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

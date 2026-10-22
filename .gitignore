@@ -1,1 +1,20 @@
+# OS junk
+.DS_Store
+
+# Local notes, not for publication
+.notes.md
+
+# Trailer videos (the site uses the canvas trailer in ernesto-trailer.html)
 ernesto-trailer.mp4
+ernesto-trailer-web.mp4
+
+# Dev-only logo page (already embedded in index.html)
+ernesto-logo.html
+
+# Logo kit: only the files the site uses are committed
+assets/Logo_HEIG-VD_ENGLISH/
+assets/Logo_REDS/Rouge/
+assets/Logo_REDS/Noir/
+assets/Logo_REDS/Blanc/REDS_HEIG-VD_logotype_blanc-rvb.png
+assets/Logo_HES-SO/HES_SO_Logo_CMYK_Monochrome.png
+assets/Logo_HES-SO/HES_SO_Logo_CMYK_Monochrome_K.png

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <title>Ernesto — Trailer</title>
 <style>
 @font-face{
@@ -288,7 +289,7 @@ function cross(ctx, x, y, s, color = C.red, a = 1) {
 }
 
 /* ---------- ERNESTO, the character ----------
-   Geometry measured from the Hermes avatar (assets/avatar.png):
+   Geometry measured from the Ernesto avatar (assets/avatar.png):
    body #8B5CF6 squircle, eyes at ±0.138s, -0.086s, radius 0.069s.          */
 function ernesto(ctx, x, y, s, o = {}) {
   const { blink = 0, lx = 0, ly = 0, mood = 'neutral', alpha = 1, rot = 0, sq = 0, glowA = 0.55,
@@ -756,7 +757,6 @@ function sReveal(ctx, t) {
       const lw = tw(t, ti + .5, ti + 1.4, 0, 560, E.inOutCubic);
       ctx.fillStyle = C.gold; ctx.fillRect(cx - lw / 2, 800, lw, 2);
       txt(ctx, 'THE NEW LAB MEMBER', cx, 856, { size: 24, fam: F.mono, track: 10, color: C.gold, align: 'center', alpha: ramp(t, ti + 1.0, ti + 1.7) });
-      txt(ctx, 'powered by Hermes Agent', cx, 985, { size: 22, fam: F.mono, track: 3, color: C.dim, align: 'center', alpha: ramp(t, ti + 1.8, ti + 2.6) * .8 });
     }
     ctx.restore();
     shock(ctx, cx, cy, t, imp, { r0: SQ * .55, r1: 1500, w: 40 });
@@ -1054,11 +1054,11 @@ function sCode(ctx, t, canvas) {
   ctx.save(); chapterCam(ctx, lt);
   const x0 = tw(lt, 7.0, 7.7, (W - 1110) / 2, 90, E.inOutCubic), y0 = 150, w0 = 1110, h0 = 790;
   const a = ramp(lt, 1.15, 1.5);
-  windowChrome(ctx, x0, y0, w0, h0, 'ernesto — hermes — lab-gpu', a);
+  windowChrome(ctx, x0, y0, w0, h0, 'ernesto — lab-gpu', a);
   if (a > 0) {
     let y = y0 + 110;
-    txt(ctx, '⚕ Hermes Agent', x0 + 34, y, { size: 21, fam: F.mono, color: C.gold, alpha: a });
-    txt(ctx, '· ernesto · Qwen3.8-27B (local) · 197 skills', x0 + 230, y, { size: 21, fam: F.mono, color: C.dim, alpha: a });
+    txt(ctx, '⚕ Ernesto', x0 + 34, y, { size: 21, fam: F.mono, color: C.gold, alpha: a });
+    txt(ctx, '· Qwen3.8-27B (local) · 197 skills', x0 + 230, y, { size: 21, fam: F.mono, color: C.dim, alpha: a });
     y += 62;
     const ps = typed(lt, 1.75, 52, PROMPT2);
     txt(ctx, '❯', x0 + 34, y, { size: 23, fam: F.mono, color: ch.col, alpha: a });
@@ -1590,16 +1590,10 @@ function sLogo(ctx, t) {
   ctx.fillStyle = C.gold; ctx.fillRect(cx - lw / 2, 762, lw, 2);
   wordsReveal(ctx, ['Research.', 'Code.', 'Paperwork.', 'Education.'], cx, 840, t, T.logo + 1.0, { size: 52, stagger: .22, dur: .7, out: 101.6, outDur: .5 });
   txt(ctx, 'YOUR NEW LAB MEMBER', cx, 912, { size: 24, fam: F.mono, track: 10, align: 'center', color: C.gold, alpha: ramp(lt, 2.2, 2.8) * (1 - ramp(t, 101.1, 101.6)) });
-  txt(ctx, 'powered by Hermes Agent · open source · Nous Research', cx, 1010, { size: 20, fam: F.mono, track: 2, align: 'center', color: C.dim, alpha: ramp(lt, 2.8, 3.4) * (1 - ramp(t, 101.1, 101.6)) });
   ctx.fillStyle = `rgba(0,0,0,${ramp(t, 101.1, 101.6)})`; ctx.fillRect(0, 0, W, H);
 }
 
-/* ---------- call to action ---------- */
-const CMD1 = 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash';
-const CMD2 = 'hermes setup';
-const CTA = { c1: 102.5, ok1: 104.6, c2: 105.2, ok2: 106.4 };
-CUE.typing.push([CTA.c1, CTA.c1 + CMD1.length / 36], [CTA.c2, CTA.c2 + CMD2.length / 18]);
-CUE.success.push(CTA.ok1, CTA.ok2);
+/* ---------- lab card ---------- */
 CUE.pops.push(108.4);
 function sCTA(ctx, t) {
   const lt = t - T.cta, cx = W / 2;
@@ -1607,32 +1601,14 @@ function sCTA(ctx, t) {
   glow(ctx, cx, 560, 900, 'rgba(139,92,246,0.10)');
   const fade = ramp(lt, 0, .5) * (1 - ramp(t, 109.7, 110.4));
   ctx.save(); ctx.globalAlpha = fade;
-  txt(ctx, 'Get your own Ernesto.', cx, 290, { size: 84, weight: 800, align: 'center', track: -1, alpha: E.outCubic(ramp(lt, .1, .7)) });
-  const tx = 300, ty = 380, tw0 = 1320, th = 330;
-  windowChrome(ctx, tx, ty, tw0, th, 'terminal', ramp(lt, .4, .8));
-  let y = ty + 120;
-  const s1 = typed(t, CTA.c1, 36, CMD1);
-  txt(ctx, '$', tx + 40, y, { size: 26, fam: F.mono, color: C.green });
-  let w1 = txt(ctx, s1, tx + 76, y, { size: 26, fam: F.mono });
-  if (t < CTA.ok1 && t > CTA.c1 - .4 && Math.floor(t * 3) % 2 === 0) { ctx.fillStyle = C.text; ctx.fillRect(tx + 80 + w1, y - 22, 13, 28); }
-  y += 50;
-  if (t > CTA.ok1) txt(ctx, '✓ Hermes Agent installed', tx + 40, y, { size: 26, fam: F.mono, color: C.green, alpha: ramp(t, CTA.ok1, CTA.ok1 + .2) });
-  y += 60;
-  if (t > CTA.c2 - .3) {
-    const s2 = typed(t, CTA.c2, 18, CMD2);
-    txt(ctx, '$', tx + 40, y, { size: 26, fam: F.mono, color: C.green });
-    const w2 = txt(ctx, s2, tx + 76, y, { size: 26, fam: F.mono });
-    if (t < CTA.ok2 && Math.floor(t * 3) % 2 === 0) { ctx.fillStyle = C.text; ctx.fillRect(tx + 80 + w2, y - 22, 13, 28); }
-  }
-  y += 50;
-  if (t > CTA.ok2) txt(ctx, '✓ Ready. Say hello to your new lab member.', tx + 40, y, { size: 26, fam: F.mono, color: C.violetL, alpha: ramp(t, CTA.ok2, CTA.ok2 + .2) });
-  txt(ctx, 'hermes-agent.nousresearch.com/docs', cx, 830, { size: 28, fam: F.mono, align: 'center', color: C.gold, alpha: ramp(t, 107.0, 107.6), track: 1 });
-  txt(ctx, 'Set it up this week — it gets better the more the lab uses it.', cx, 885, { size: 26, align: 'center', color: C.dim, alpha: ramp(t, 107.4, 108.0) });
-  // Ernesto peeks over the terminal and winks
-  const pk = E.outBack(ramp(t, 106.6, 107.2));
-  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, ty + 2); ctx.clip();
-  ernesto(ctx, tx + tw0 - 105, ty + 90 - pk * 110, 150, { glowA: .5, mood: t > 108.4 && t < 109.3 ? 'wink' : 'neutral', lx: lookPath(t, [[107.4, -.8, .6], [108.2, 0, 0]])[0], ly: lookPath(t, [[107.4, -.8, .6], [108.2, 0, 0]])[1] });
-  ctx.restore();
+  ernesto(ctx, cx, 330 + idleBob(t, 4), 220, { glowA: .9, blink: blinkAt(t, [103.4, 106.9]) });
+  const g = ctx.createLinearGradient(0, 540, 0, 700); g.addColorStop(0, '#fff'); g.addColorStop(1, C.violetL);
+  txt(ctx, 'ERNESTO', cx, 660, { size: 150, weight: 900, align: 'center', color: g, track: 6, alpha: E.outCubic(ramp(lt, .15, .9)) });
+  const lw = tw(lt, .5, 1.3, 0, 560, E.inOutCubic);
+  ctx.fillStyle = C.gold; ctx.fillRect(cx - lw / 2, 700, lw, 2);
+  txt(ctx, 'THE NEW LAB MEMBER', cx, 762, { size: 24, fam: F.mono, track: 10, align: 'center', color: C.gold, alpha: ramp(lt, .9, 1.5) });
+  txt(ctx, 'REDS INSTITUTE · HEIG-VD', cx, 830, { size: 24, fam: F.mono, track: 4, align: 'center', color: C.dim, alpha: ramp(t, 107.0, 107.6) });
+  txt(ctx, '100% LOCAL  ·  SELF-HOSTED  ·  UNLIMITED  ·  EFFICIENT', cx, 920, { size: 26, fam: F.mono, track: 2, align: 'center', color: C.violetL, alpha: E.outCubic(ramp(t, 108.4, 108.9)) });
   ctx.restore();
 }
 
@@ -2054,13 +2030,13 @@ const Player = {
     };
     btn.addEventListener('click', go);
     window.addEventListener('keydown', e => {
+      if (e.key === 'f' || e.key === 'F') { this.fs(); this.showUI(); return; }
       if (!this.started) { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (!btn.disabled) go(); } return; }
       if (e.code === 'Space') { e.preventDefault(); this.toggle(); }
       if (e.code === 'ArrowRight') this.seek(this.time() + 5);
       if (e.code === 'ArrowLeft') this.seek(this.time() - 5);
       if (e.key === 'r' || e.key === 'R') this.seek(0, true);
       if (e.key === 'm' || e.key === 'M') this.gain.gain.value = this.gain.gain.value > 0 ? 0 : 1;
-      if (e.key === 'f' || e.key === 'F') this.fs();
       this.showUI();
     });
     canvas.addEventListener('dblclick', () => this.fs());
