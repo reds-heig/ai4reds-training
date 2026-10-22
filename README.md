@@ -47,3 +47,4 @@ Ernesto executes multi-step tasks with tools: files, terminal, web search. It is
 |------|------|-----------------|
 | [Mehdi Akeddar](mailto:mehdi.akeddar@heig-vd.ch) & [Guillaume Chacun](mailto:guillaume.chacun@heig-vd.ch) | AI Engineer | Created Ernesto, set up the local AI infrastructure of the institute |
 | [Yorick Brunet](mailto:yorick.brunet@heig-vd.ch) | DevOps Engineer | Beta testing, GitLab setup, install scripts, new skills |
+| [Marina Zapater](mailto:marina.zapater@heig-vd.ch) | Professor | Secured the project funding, led the beta testing, and baptized the assistant: Ernesto |
