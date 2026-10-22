@@ -31,7 +31,7 @@ Ernesto executes multi-step tasks with tools: files, terminal, web search. It is
 | Page | Content |
 |------|---------|
 | `index.html` | Landing page: introduction, trailer, workshop |
-| `ernesto-trailer.html` | The trailer: a 1 min 55 canvas animation |
+| `ernesto-trailer.html` | The trailer: a 1 min 47 canvas animation |
 | `workshop.html` | Interactive workshop, 5 tabs: architecture, agent loop, context window, skills and persona, prompts and security |
 | `assets/` | Favicon and the logos the site uses |
 
