@@ -1880,9 +1880,18 @@ async function composeScore(onProgress) {
   Q.sort((a, b) => a[0] - b[0]);
   let qi = 0;
   const flush = until => { while (qi < Q.length && Q[qi][0] < until) Q[qi++][1](); };
-  flush(1.5);
-  for (let s = 1; s < DURATION + 1; s += 1) ac.suspend(s).then(() => { flush(s + 1.5); onProgress && onProgress(s / DURATION); ac.resume(); });
+  // Firefox has no OfflineAudioContext.suspend(), so it cannot pause the render.
+  // Build the whole graph up front there. Chrome pauses each second and reports progress.
+  let progTick = null;
+  if (typeof ac.suspend === 'function') {
+    flush(1.5);
+    for (let s = 1; s < DURATION + 1; s += 1) ac.suspend(s).then(() => { flush(s + 1.5); onProgress && onProgress(s / DURATION); ac.resume(); });
+  } else {
+    flush(DURATION);
+    progTick = setInterval(() => onProgress && onProgress(-1), 1000);
+  }
   const buf = await ac.startRendering();
+  clearInterval(progTick);
   // normalise to -1 dBFS
   let peak = 0; for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; } }
   const k = .89 / (peak || 1);
@@ -1982,10 +1991,7 @@ const Player = {
     const ov = document.getElementById('ov'), btn = document.getElementById('play'), st = document.getElementById('status');
     this.idle(); // animated title card behind the overlay
     const t0 = performance.now();
-    this.bufP = composeScore(p => { st.textContent = p < 1 ? `composing the score… ${Math.round(p * 100)}%` : 'ready'; });
-    this.buf = await this.bufP;
-    st.textContent = `ready · ${Math.round((performance.now() - t0) / 100) / 10}s to compose`;
-    btn.disabled = false; btn.classList.add('ready');
+    // register controls before the long compose, so F/fullscreen work while it runs
     const go = async () => {
       if (this.started) return;
       this.started = true; ov.classList.add('hide');
@@ -2011,6 +2017,10 @@ const Player = {
     const bar = document.getElementById('bar');
     bar.addEventListener('click', e => { const r = bar.getBoundingClientRect(); this.seek((e.clientX - r.left) / r.width * DURATION, true); });
     document.getElementById('replay').addEventListener('click', () => this.seek(0, true));
+    this.bufP = composeScore(p => { st.textContent = p < 0 ? `composing the score… ${Math.round((performance.now() - t0) / 1000)}s` : p < 1 ? `composing the score… ${Math.round(p * 100)}%` : 'ready'; });
+    this.buf = await this.bufP;
+    st.textContent = `ready · ${Math.round((performance.now() - t0) / 100) / 10}s to compose`;
+    btn.disabled = false; btn.classList.add('ready');
   },
   fs() { const el = document.documentElement; document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen && el.requestFullscreen(); },
   idle() {
