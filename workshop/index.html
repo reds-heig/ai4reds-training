@@ -21,6 +21,7 @@ body{margin:0;background:var(--bg);color:var(--fg);
 .tab{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;
   color:var(--muted);cursor:pointer;font-size:13.5px;font-family:inherit}
 .tab:hover{color:var(--fg)}
+.tab[href]{text-decoration:none}
 .tab.on{background:color-mix(in srgb, var(--indigo) 18%, transparent);color:var(--fg);
   border-color:color-mix(in srgb, var(--indigo) 55%, transparent)}
 .tab:disabled{opacity:.35;cursor:default}
@@ -59,7 +60,7 @@ h2{font-size:36px;margin:0 0 4px}
 #sk-doc article:first-child .sktag{margin-top:0}
 #sk-doc .skh{font-size:16px;margin:8px 0 6px;color:var(--fg)}
 #sk-doc .skl{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;line-height:1.55;color:var(--muted);white-space:pre-wrap}
-#sk-doc .hl{background:rgba(251,191,36,.18);color:var(--fg);border-radius:3px}
+#sk-doc .hl,.hl{background:rgba(251,191,36,.18);color:var(--fg);border-radius:3px;padding:0 3px}
 .skmore{opacity:.55;font-style:italic;margin-top:4px}
 #sk-cap{position:absolute;left:0;right:0;bottom:0;background:rgba(11,18,32,.94);border-top:1px solid var(--border);padding:10px 16px;font-size:13.5px;color:var(--muted);line-height:1.5}
 .archwrap{display:grid;grid-template-columns:460px 1fr;gap:26px;align-items:start}
@@ -460,6 +461,7 @@ svg{display:block;width:100%;height:auto}
 <body>
 <div id="progress"></div>
 <nav id="bar">
+  <a class="tab" id="lk-home" href="https://reds-heig.github.io/ai4reds-training/">&larr; Main page</a>
   <button class="tab" data-b="00">Start</button>
   <button class="tab" data-b="0">0 &middot; How it works</button>
   <button class="tab" data-b="1">1 &middot; MobileLLM</button>
@@ -1019,6 +1021,8 @@ REG.screen({
     if(!document.getElementById("s-00").classList.contains("on"))throw new Error("title screen not visible");
     const er=document.getElementById("ernesto");
     if(!er||!er.querySelector(".er")||!er.querySelector(".er-mouth")||er.querySelectorAll(".eye").length!==2)throw new Error("Ernesto logo missing or incomplete");
+    const h=document.getElementById("lk-home");
+    if(!h||h.getAttribute("href")!=="https://reds-heig.github.io/ai4reds-training/")throw new Error("lk-home wrong");
     const st=state();
     if(st.b!=="00"||st.sub!==0)throw new Error("state is "+JSON.stringify(st)+", want 00/0");
   }
@@ -1166,6 +1170,8 @@ REG.screen({
     if(!g||!g.textContent.includes("Our goal: understand the paper's content."))throw new Error("goal-1 wrong");
     const t=document.getElementById("prompt-1");
     if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_1))throw new Error("prompt-1 text wrong");
+    const hl1=t.querySelector(".hl");
+    if(!hl1||hl1.textContent!=="Build a single-page web UI that teaches the paper.")throw new Error("prompt-1 hl wrong");
     const d=document.getElementById("lk-1-demo");
     if(!d||d.getAttribute("href")!=="../demo/index.html"||d.target!=="_blank")throw new Error("lk-1-demo wrong");
     const demoLinks=[...document.querySelectorAll("#s-1 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
@@ -1176,7 +1182,7 @@ REG.screen({
   }
 });
 // fill the static prompt panel, give the screen its play
-REG.list.find(s=>s.id==="s-1").play=bindPrompt("prompt-1",PROMPT_1);
+REG.list.find(s=>s.id==="s-1").play=bindPrompt("prompt-1",PROMPT_1,"Build a single-page web UI that teaches the paper.");
 
 // beat 2 — REA (one screen: git link, goal, prompt, demo link)
 REG.screen({
@@ -1189,6 +1195,8 @@ REG.screen({
     if(!g||!g.textContent.includes("Our goal: understand how we can use it."))throw new Error("goal-2 wrong");
     const t=document.getElementById("prompt-2");
     if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_2))throw new Error("prompt-2 text wrong");
+    const hl2=t.querySelector(".hl");
+    if(!hl2||hl2.textContent!=="Build a UI to teach me what this does, how it works and how I can use this.")throw new Error("prompt-2 hl wrong");
     const d=document.getElementById("lk-2-demo");
     if(!d||d.getAttribute("href")!=="../demo/rea/index.html"||d.target!=="_blank")throw new Error("lk-2-demo wrong");
     const demoLinks=[...document.querySelectorAll("#s-2 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
@@ -1209,14 +1217,15 @@ const runSeq=steps=>{
 // use-case beat template: prompt / watch / look
 const stage=document.getElementById("stage");
 // fill a static prompt panel. one .line wraps naturally; play is a no-op (no reveal animation)
-function bindPrompt(id,text){
+function bindPrompt(id,text,hl){
   const t=document.getElementById(id);
-  t.innerHTML='<div class="line show">'+text+'</div>';
+  const inner=hl?text.replace(hl,'<span class="hl">'+hl+'</span>'):text;
+  t.innerHTML='<div class="line show">'+inner+'</div>';
   return function(){};
 }
 
 // beat 3 — skill creation (motivation / prompt / viewer)
-REG.list.find(s=>s.id==="s-2").play=bindPrompt("prompt-2",PROMPT_2);
+REG.list.find(s=>s.id==="s-2").play=bindPrompt("prompt-2",PROMPT_2,"Build a UI to teach me what this does, how it works and how I can use this.");
 REG.screen({
   b:"3",sub:0,id:"s-3-1",
   check(){
@@ -1232,6 +1241,8 @@ REG.screen({
     go("3",1);
     const t=document.getElementById("prompt-3");
     if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_3))throw new Error("prompt-3 text wrong");
+    const hl3=t.querySelector(".hl");
+    if(!hl3||hl3.textContent!=="Create a skill from your experience: the routine, the goals and the checks.")throw new Error("prompt-3 hl wrong");
     fit("s-3-2");
   }
 });
@@ -1290,6 +1301,8 @@ REG.screen({
     if(!g||!g.textContent.includes("Our goal: understand how we can use it."))throw new Error("goal-4 wrong");
     const t=document.getElementById("prompt-4");
     if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_4))throw new Error("prompt-4 text wrong");
+    const hl4=t.querySelector(".hl");
+    if(!hl4||hl4.textContent!=="Follow the skill at skills/one-page-teaching-ui/SKILL.md.")throw new Error("prompt-4 hl wrong");
     const d=document.getElementById("lk-4-demo");
     if(!d||d.getAttribute("href")!=="../demo/live/ponytail.html"||d.target!=="_blank")throw new Error("lk-4-demo wrong");
     const demoLinks=[...document.querySelectorAll("#s-4 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
@@ -1301,7 +1314,7 @@ REG.screen({
 });
 
 // beat 5 — wrap
-REG.list.find(s=>s.id==="s-4").play=bindPrompt("prompt-4",PROMPT_4);
+REG.list.find(s=>s.id==="s-4").play=bindPrompt("prompt-4",PROMPT_4,"Follow the skill at skills/one-page-teaching-ui/SKILL.md.");
 REG.screen({
   b:"5",sub:0,id:"s-5-1",
   check(){
@@ -1328,7 +1341,7 @@ REG.list.find(s=>s.id==="s-3-1").play=(function(){
     runSeq(steps);
   };
 })();
-REG.list.find(s=>s.id==="s-3-2").play=bindPrompt("prompt-3",PROMPT_3);
+REG.list.find(s=>s.id==="s-3-2").play=bindPrompt("prompt-3",PROMPT_3,"Create a skill from your experience: the routine, the goals and the checks.");
 // skill viewer: fit the whole file (zoomed out) or one section (zoomed in)
 const SK_OUT='<div>How it looks &mdash; frontmatter (name + description) and five sections, one file.</div><div>How it is made &mdash; prompt 3 from two real runs; Pitfalls are real bugs from those runs.</div><div>How it works &mdash; the description stays in context; the body loads only when the task matches.</div>';
 const SK_CAPS={
