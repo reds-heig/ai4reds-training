@@ -117,12 +117,12 @@ h2{font-size:36px;margin:0 0 4px}
 .wu-quote.show{opacity:1}
 .wu-links{display:flex;gap:14px;justify-content:center;opacity:0;transition:opacity .4s}
 .wu-links.show{opacity:1}
-.wu-contact{margin-top:48px;text-align:center;opacity:0;transition:opacity .4s}
+.wu-contact{margin-top:96px;text-align:center;opacity:0;transition:opacity .4s}
 .wu-contact.show{opacity:1}
 .wu-contact .lbl{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
 .wu-team{display:flex;justify-content:center;gap:16px 44px;flex-wrap:wrap}
 .wu-team .person{display:flex;flex-direction:column;align-items:center;gap:3px}
-.wu-team a{font-size:15px;color:var(--gold);text-decoration:none;transition:color .2s}
+.wu-team a{font-size:15px;color:var(--muted);text-decoration:none;transition:color .2s}
 .wu-team a:hover{color:var(--fg)}
 .wu-team .role{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7}
 .wu-inst{margin-top:16px;font-size:12.5px;letter-spacing:.06em;color:var(--muted);opacity:.75}
@@ -248,7 +248,8 @@ h2{font-size:36px;margin:0 0 4px}
   #s-0-2 #svgLoop{max-width:640px;margin:0 auto}
   #s-0-7 #svgSec{max-width:1100px}
 }
-#prompt-1 .line,#prompt-2 .line,#prompt-3 .line,#prompt-4 .line{font-size:22px;line-height:1.38;margin:2px 0;overflow-wrap:anywhere}
+#prompt-1 .line,#prompt-2 .line,#prompt-3 .line,#prompt-4 .line{font-size:22px;line-height:1.38;margin:2px 0;overflow-wrap:anywhere;transform:translateY(8px);transition:opacity .55s ease .2s,transform .55s ease .2s}
+#prompt-1 .line.show,#prompt-2 .line.show,#prompt-3 .line.show,#prompt-4 .line.show{transform:none}
 /* use-case prompt slides: keep the 22px prompt inside the 768 budget */
 #s-1 .lead,#s-2 .lead,#s-3-2 .lead,#s-4 .lead{margin-bottom:8px}
 #s-1 .goal,#s-2 .goal,#s-4 .goal{margin:10px 0 12px}
@@ -1239,8 +1240,11 @@ const stage=document.getElementById("stage");
 function bindPrompt(id,text,hl){
   const t=document.getElementById(id);
   const inner=hl?text.replace(hl,'<span class="hl">'+hl+'</span>'):text;
-  t.innerHTML='<div class="line show">'+inner+'</div>';
-  return function(){};
+  return ()=>{
+    t.innerHTML='<div class="line">'+inner+'</div>';
+    const line=t.firstChild;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>line.classList.add("show")));
+  };
 }
 
 // beat 3 — skill creation (motivation / prompt / viewer)
