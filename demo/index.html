@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobileLLM — paper to code</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --ink:#16233a; --muted:#5b6b82; --card:#ffffff; --line:#e2e8f0;
+    --accent:#0a57d0; --accent-soft:#eaf1fd;
+    --paper-tint:#fffaef; --paper-line:#f2c14e;
+    --code-bg:#0d1526; --code-ink:#d7e1f4; --code-hl:rgba(59,130,246,.22);
+    --ok:#1a7f37;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(245,246,248,.92);
+      backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:8px;padding:10px 20px;overflow-x:auto}
+  nav a{white-space:nowrap;font-size:13px;color:var(--muted);padding:5px 11px;
+        border-radius:99px;border:1px solid transparent}
+  nav a.active{background:var(--accent-soft);color:var(--accent);border-color:#c4d7f5;font-weight:600}
+
+  /* hero */
+  header.hero{padding:52px 0 30px}
+  .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-size:clamp(28px,4.5vw,44px);line-height:1.15;margin:10px 0 14px}
+  .sub{font-size:18px;color:var(--muted);max-width:760px}
+  .hero-links{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+  .hero-links a{font-size:14px;padding:7px 14px;border-radius:8px;background:var(--card);
+                border:1px solid var(--line);color:var(--accent);font-weight:600}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:12px 18px;min-width:150px}
+  .stat b{display:block;font-size:22px}
+  .stat span{font-size:12.5px;color:var(--muted)}
+
+  /* tree */
+  .tree{background:var(--code-bg);color:var(--code-ink);border-radius:12px;
+        padding:18px 22px;font:13px/1.7 var(--mono);margin-top:26px;overflow-x:auto;white-space:pre}
+  .tree .c{color:#7d8db0}
+
+  /* cards */
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+               margin:26px 0;overflow:hidden;scroll-margin-top:70px}
+  .card>header{padding:22px 26px 0}
+  .chip{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);
+        background:var(--accent-soft);border-radius:99px;padding:3px 10px;margin-bottom:8px}
+  .chip.warm{color:#9a6700;background:#fdf3d7}
+  .chip.cold{color:#0b6e4f;background:#e2f6ec}
+  h2{font-size:24px;margin:0 0 4px}
+  .card .lede{color:var(--muted);margin:6px 0 0;max-width:820px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:20px}
+  @media(max-width:860px){.cols{grid-template-columns:1fr}}
+  .col{padding:0 26px 22px}
+  .col.paper{background:var(--paper-tint);border-right:1px solid var(--line);border-top:3px solid var(--paper-line)}
+  .col.code{border-top:3px solid var(--accent)}
+  @media(max-width:860px){.col.paper{border-right:none}}
+  .col h3{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:18px 0 10px}
+  .col p{font-size:15px}
+  .fig{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:10px;
+       padding:10px;display:block}
+  .cap{font-size:12.5px;color:var(--muted);margin-top:8px}
+  .filetag{font:12.5px var(--mono);color:var(--muted);margin:14px 0 8px}
+  .filetag a{color:var(--accent);word-break:break-all}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;
+      padding:16px 18px;font:12.5px/1.65 var(--mono);overflow-x:auto;margin:0}
+  pre .hl{background:var(--code-hl);display:block;margin:0 -18px;padding:0 18px;
+          border-left:3px solid #5aa2ff}
+  pre .cm{color:#7d8db0}
+  pre .k{color:#8fd0ff}
+  .note{font-size:13.5px;color:var(--muted);margin-top:10px}
+  .note b{color:var(--ink)}
+  .link{background:var(--accent-soft);border-top:1px solid #c4d7f5;padding:14px 26px;
+        font-size:15px}
+  .link b{color:var(--accent)}
+  table.num{border-collapse:collapse;font-size:13.5px;margin-top:10px;width:100%}
+  table.num th,table.num td{border:1px solid var(--line);padding:6px 10px;text-align:right}
+  table.num th:first-child,table.num td:first-child{text-align:left}
+  table.num th{background:#f2f5f9}
+  .badge-no{display:inline-block;font-size:11.5px;font-weight:700;color:#9a3412;background:#fdeadd;
+            border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+  footer{padding:30px 0 60px;color:var(--muted);font-size:13.5px}
+  footer .wrap{border-top:1px solid var(--line);padding-top:22px}
+  ul.src{margin:8px 0 0;padding-left:20px}
+  ul.src li{margin:4px 0}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a href="#why">Why sub-1B</a>
+  <a href="#deep">Deep &amp; thin</a>
+  <a href="#embedding">Embedding sharing</a>
+  <a href="#layer">Layer sharing</a>
+  <a href="#gqa">KV heads</a>
+  <a href="#train">Training</a>
+  <a href="#notinrepo">Paper-only</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Paper → Code walkthrough</div>
+  <h1>MobileLLM: sub-billion LLMs for phones,<br>read against its own source code</h1>
+  <p class="sub">This page teaches the MobileLLM paper (ICML 2024) by pairing every design
+     decision with the exact code that implements it. Left: what the paper says.
+     Right: what the repo does. Bottom: the link between the two.</p>
+  <div class="hero-links">
+    <a href="https://arxiv.org/abs/2402.14905">Paper — arXiv:2402.14905</a>
+    <a href="https://github.com/facebookresearch/MobileLLM">Code — facebookresearch/MobileLLM</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>1T</b><span>training tokens, 480k steps (§2.1, pretrain.sh)</span></div>
+    <div class="stat"><b>32× A100</b><span>training cluster (§2.1, torchrun ×4 nodes)</span></div>
+    <div class="stat"><b>iPhone 13</b><span>on-device profiling, ExecuTorch + MPS (§3.6)</span></div>
+    <div class="stat"><b>+2.7% / +4.3%</b><span>accuracy over prior 125M / 350M SOTA (abstract)</span></div>
+  </div>
+  <div class="tree"><span class="c">MobileLLM/  (the whole repo is small — five Python files)</span>
+pretrain.py            <span class="c"># training entry point (8 GPUs per node)</span>
+eval.py                <span class="c"># WikiText-2 perplexity</span>
+pretrain.sh            <span class="c"># the exact flags used for the paper's runs</span>
+eval.sh
+configs/125M  350M  600M  1B  1.5B   <span class="c"># one config dir per model size</span>
+utils/modeling_llama.py <span class="c"># the model — every design choice lives here</span>
+utils/pretrain_trainer.py
+utils/process_args.py</div>
+</div></header>
+
+<div class="wrap">
+
+<!-- 1 WHY -->
+<section class="card" id="why">
+  <header>
+    <span class="chip warm">Figure 1 · Figure 2 · §1</span>
+    <h2>Why sub-billion?</h2>
+    <p class="lede">The paper starts from a constraint: a phone's DRAM is small. The model must fit.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <img class="fig" src="figs/1_overall_accuracy_pdf.svg" alt="Figure 1: sub-1B LLM accuracy landscape">
+      <p class="cap"><b>Figure 1.</b> Average zero-shot common-sense score for LLMs under 1B parameters. Bubble area = model size. MobileLLM-125M/350M sit far ahead of previous sub-1B models (abstract: +2.7% / +4.3%).</p>
+      <img class="fig" style="margin-top:14px" src="figs/2_hardware_illustration_pdf.svg" alt="Figure 2: mobile memory hierarchy">
+      <p class="cap"><b>Figure 2.</b> Memory hierarchy of a phone: Flash is large but slow; DRAM is fast but limited to a few GB. Weights and the KV cache must live in DRAM.</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>Nothing on-device runs here: the repo <b>trains</b> the models. Its size is the point —
+      the entire implementation of a trainable LLM family that fits on a phone is
+      <b>five Python files</b> (see the tree above).</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/configs/125M/config.json">configs/125M/config.json</a></div>
+      <pre>{
+  <span class="k">"vocab_size"</span>: 32000,
+  <span class="k">"hidden_size"</span>: 576,
+  <span class="k">"num_hidden_layers"</span>: 30,
+  ...
+  <span class="k">"torch_dtype"</span>: "float16"
+}
+<span class="cm">// 125M params ≈ 250 MB in FP16 —
+// a fraction of phone DRAM</span></pre>
+      <p class="note">The figure-to-code link here is the whole design goal:
+      Figure 2 is the problem, and every file in this repo is part of the answer.</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> The paper frames the constraint (Fig 2), reports the result (Fig 1),
+  and the repo is the machine that produces the models in both figures.</div>
+</section>
+
+<!-- 2 DEEP & THIN -->
+<section class="card" id="deep">
+  <header>
+    <span class="chip">Figure 3 · Figure 4 · §2.2.1–2.2.2 · Appendix B–C</span>
+    <h2>Deep and thin, with SwiGLU</h2>
+    <p class="lede">For the same parameter budget, a tall narrow model beats a short wide one.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <img class="fig" src="figs/3_contribution_break_down_pdf.svg" alt="Figure 3: design roadmap">
+      <p class="cap"><b>Figure 3.</b> The 125M model starts as a 12-layer, 768-dim transformer and grows
+      through FFN upgrades, depth changes and weight sharing (caption). Each bar is one design decision.</p>
+      <img class="fig" style="margin-top:14px" src="figs/4_depth_vs_width_pdf.svg" alt="Figure 4: depth vs width">
+      <p class="cap"><b>Figure 4.</b> At equal size, deeper-and-thinner wins on reasoning, QA and reading comprehension.</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>The final 125M is <b>30 layers of 576 dims</b> (the paper's Fig 3 endpoint) —
+      2.5× deeper than the 12-layer starting point, at a narrower width:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/configs/125M/config.json">configs/125M/config.json</a></div>
+      <pre>{
+  <span class="hl">  <span class="k">"num_hidden_layers"</span>: 30,
+  <span class="k">"hidden_size"</span>: 576,
+  <span class="k">"intermediate_size"</span>: 1536,</span>
+  <span class="k">"hidden_act"</span>: "silu",
+  ...
+}</pre>
+      <p>And the SwiGLU feed-forward network (§2.2.1, +1.3 points at 125M) is the
+      gate/up/down triple in the MLP class:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py">utils/modeling_llama.py</a> · <code>LlamaMLP</code>, L199</div>
+      <pre><span class="k">class</span> LlamaMLP(nn.Module):
+    <span class="k">def</span> __init__(self, config):
+        self.gate_proj = nn.Linear(hidden, intermediate)
+        self.up_proj   = nn.Linear(hidden, intermediate)
+        self.down_proj = nn.Linear(intermediate, hidden)
+        self.act_fn = ACT2FN[config.hidden_act]  <span class="cm"># "silu"</span></pre>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> Figure 3's final bar is literally <code>num_hidden_layers: 30</code> plus
+  <code>hidden_size: 576</code> in the config; the SwiGLU choice is the two projection matrices in <code>LlamaMLP</code>.</div>
+</section>
+
+<!-- 3 EMBEDDING SHARING -->
+<section class="card" id="embedding">
+  <header>
+    <span class="chip">Table 1 · §2.2.3</span>
+    <h2>Embedding sharing: one matrix, two jobs</h2>
+    <p class="lede">The input embedding table doubles as the output projection. Fewer weights, better accuracy at this scale.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <p><b>Table 1</b> ablates input/output embedding sharing on a 30-layer, 512-dim model:
+      sharing the embedding with the language-model head raises zero-shot common-sense
+      accuracy, so the released models turn it on.</p>
+      <p>The saving is real: a 576-dim × 32,000-vocab head alone is ~18M params —
+      15% of a 125M model. Sharing deletes it.</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>Two branches, one flag:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L1130">utils/modeling_llama.py</a> · <code>LlamaForCausalLM.__init__</code>, L1130</div>
+      <pre><span class="k">def</span> __init__(self, config):
+    super().__init__(config)
+    self.model = LlamaModel(config)
+    <span class="hl">    <span class="k">if not</span> getattr(self.config, "share_embedding", <span class="k">False</span>):
+        self.lm_head = nn.Linear(config.hidden_size,
+                                 config.vocab_size)</span></pre>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L1229">same file</a> · <code>LlamaForCausalLM.forward</code>, L1229</div>
+      <pre><span class="k">if not</span> getattr(self.config, "share_embedding", <span class="k">False</span>):
+    logits = self.lm_head(hidden_states)
+<span class="hl"><span class="k">else</span>:
+    logits = F.linear(hidden_states,
+                      self.model.embed_tokens.weight)</span></pre>
+      <p class="note">The flag travels: <code>pretrain.sh</code> (<code>--share_embedding True</code>) →
+      <a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/process_args.py#L26">process_args.py:26</a> →
+      <a href="https://github.com/facebookresearch/MobileLLM/blob/main/pretrain.py#L167">pretrain.py:167</a> → the model.</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> Table 1's winning row is the <code>else</code> branch at L1232:
+  the logits come from the input embedding matrix itself, no separate <code>lm_head</code> exists.</div>
+</section>
+
+<!-- 4 LAYER SHARING -->
+<section class="card" id="layer">
+  <header>
+    <span class="chip">Figure 6 · Table 2 · Table 7 · §2.3</span>
+    <h2>Layer sharing: double the depth, same weights</h2>
+    <p class="lede">The paper's signature trick — MobileLLM-LS — is four lines in a Python loop.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <img class="fig" src="figs/5_layer_share_setting_pdf.png" alt="Figure 6: four layer-sharing strategies">
+      <p class="cap"><b>Figure 6.</b> Four strategies: (a) none, (b) <b>immediate block-wise</b>,
+      (c) repeat-all-over, (d) reverse. Table 2: (b) wins at 350M (50.2 avg) and leads by 0.2
+      at 125M (45.0 vs 45.2); the paper adopts (b).
+      The abstract: "no increase in model size and only marginal latency overhead".</p>
+      <p><b>Table 7</b> — the proof, measured on an iPhone 13 (ExecuTorch, FP16, §3.6):</p>
+      <table class="num">
+        <tr><th></th><th>Load</th><th>Init</th><th>Execute</th></tr>
+        <tr><td>MobileLLM (30 layers)</td><td>39.2 ms</td><td>1361.7 ms</td><td>15.6 ms</td></tr>
+        <tr><td>MobileLLM-LS (2×30, shared)</td><td>43.6 ms</td><td>1388.2 ms</td><td>16.0 ms</td></tr>
+        <tr><td>60-layer, no sharing</td><td>68.6 ms</td><td>3347.7 ms</td><td>29.0 ms</td></tr>
+      </table>
+      <p class="note">Shared doubling costs +2.2% load / +2.6% execute.
+      Real doubling costs +143% / +86%. That gap is the whole contribution.</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>Strategy (b) — run each layer, then run <em>that same layer again</em> — is inside the decoder loop:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L888">utils/modeling_llama.py</a> · <code>LlamaModel</code>, L888</div>
+      <pre>self.layer_sharing = config.layer_sharing</pre>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L958">same file</a> · <code>LlamaModel.forward</code>, L958–L1015</div>
+      <pre><span class="k">for</span> decoder_layer <span class="k">in</span> self.layers:
+    layer_outputs = decoder_layer(hidden_states, ...)
+    hidden_states = layer_outputs[0]
+    <span class="hl"><span class="cm"># Repeat current layer if layer_sharing is enabled</span>
+    <span class="k">if</span> self.layer_sharing:
+        layer_outputs = decoder_layer(hidden_states, ...)
+        hidden_states = layer_outputs[0]</span></pre>
+      <p class="note">30 stored layers, 60 passes through them. The model's <em>effective</em>
+      depth doubles while its parameter count does not.
+      <code>eval.sh</code> runs the baseline with <code>--layer_sharing False</code>;
+      the default in <code>process_args.py</code> is <code>True</code>.</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> Figure 6(b) is the <code>if self.layer_sharing</code> block;
+  Table 7's numbers are what that block is worth on a real phone.
+  "MobileLLM-LS-125M (2×30 layers)" in Table 7 = 30 layers of weights, run twice, exactly as the loop does.</div>
+</section>
+
+<!-- 5 GQA -->
+<section class="card" id="gqa">
+  <header>
+    <span class="chip">Figure 5 · Table 13 · §2.2.4 · Appendix D</span>
+    <h2>Fewer KV heads: grouped-query attention</h2>
+    <p class="lede">The KV cache is what eats phone DRAM during generation. Sharing KV heads shrinks it.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <img class="fig" src="figs/5_head_sweep_pdf.svg" alt="Figure 5: ablation on number of heads and KV heads">
+      <p class="cap"><b>Figure 5.</b> Ablation on heads vs KV-heads; the ratio is heads ÷ KV-heads.
+      §2.2.4: reducing KV heads from 16 to 4 (4:1) keeps accuracy at 125M (−0.2 pts at 350M),
+      and adopting GQA adds +0.4 points. The released 125M uses 9 query heads and 3 KV heads (3:1).</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>Attention reads two different head counts from the config and expands K/V on the fly:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L255">utils/modeling_llama.py</a> · <code>LlamaAttention.__init__</code>, L255</div>
+      <pre>self.num_heads = config.num_attention_heads      <span class="cm"># 9</span>
+<span class="hl">self.num_key_value_heads = config.num_key_value_heads  <span class="cm"># 3</span></span>
+self.num_key_value_groups = self.num_heads
+    // self.num_key_value_heads               <span class="cm"># 3</span></pre>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/utils/modeling_llama.py#L227">same file</a> · <code>repeat_kv</code>, L227</div>
+      <pre><span class="k">def</span> repeat_kv(hidden_states, n_rep):
+    <span class="cm"># (batch, 3 kv heads, seq, dim) → (batch, 9, seq, dim)</span>
+    hidden_states = hidden_states[:, :, None].expand(..., n_rep, ...)
+    <span class="k">return</span> hidden_states.reshape(batch, 3*n_rep, ...)</pre>
+      <p class="note">Only 3 KV heads are stored in the cache; they are re-used for all
+      9 query groups. For 125M: <code>num_attention_heads: 9</code>,
+      <code>num_key_value_heads: 3</code> in the config.</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> Figure 5 shows KV heads can be shared across query groups without losing accuracy;
+  the released config keeps that choice (9 ÷ 3), and <code>repeat_kv</code> is the mechanism that makes one KV head serve three query heads.</div>
+</section>
+
+<!-- 6 TRAINING -->
+<section class="card" id="train">
+  <header>
+    <span class="chip cold">§2.1 · §3.6 · Table 7</span>
+    <h2>The training run that produced the numbers</h2>
+    <p class="lede">Everything in the paper's tables was trained and evaluated with the files in this repo.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>The paper says</h3>
+      <p><b>§2.1:</b> 32 A100 GPUs, batch size 32 per GPU. The final models train
+      <b>480k iterations on 1T tokens</b>. Eval: eight zero-shot reasoning tasks,
+      TQA, RACE.</p>
+      <p><b>§3.6:</b> latency measured on <b>iPhone 13</b> (iOS 17.2.1) with ExecuTorch
+      and the Metal backend, averaged over 50 iterations.</p>
+      <p class="note"><b>Honesty note:</b> the repo trains on the A100 cluster and measures
+      perplexity. The iPhone numbers in Table 7 come from the paper's ExecuTorch harness,
+      which is <em>not</em> in this repo.</p>
+    </div>
+    <div class="col code">
+      <h3>The code does</h3>
+      <p>The exact launch command from the repo, matched against §2.1:</p>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/pretrain.sh">pretrain.sh</a></div>
+      <pre>torchrun --nnodes=1 --nproc_per_node=8 pretrain.py \
+  --input_model_filename <span class="cm">"./configs/125M/"</span> \
+  --max_steps 480000            <span class="cm"># = §2.1 "480k iterations"</span>
+  --per_device_train_batch_size 32
+  --share_embedding True        <span class="cm"># = Table 1's winning row</span>
+  --lr_scheduler_type cosine
+  <span class="cm"># 4 nodes × 8 GPUs = 32 A100s = §2.1</span></pre>
+      <div class="filetag"><a href="https://github.com/facebookresearch/MobileLLM/blob/main/eval.py#L95">eval.py</a> · WikiText-2 perplexity, L95</div>
+      <pre><span class="k">for</span> i <span class="k">in</span> range(nsamples):
+    loss = loss_fct(shift_logits.view(-1, V), shift_labels)
+    nlls.append(loss * model.seqlen)
+<span class="hl">ppl = torch.exp(sum(nlls) / (nsamples * model.seqlen))</span></pre>
+      <p class="note">Data streaming lives in <code>pretrain.py</code>:
+      <code>JSONLIterator</code> reads sharded <code>.jsonl</code> files, one shard per GPU
+      (world_size 8 per node).</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> <code>pretrain.sh</code> is §2.1 as a shell script:
+  480k steps, batch 32, 8 GPUs per node, sharing on. The paper's numbers and the repo's
+  flags describe the same run.</div>
+</section>
+
+<!-- 7 PAPER ONLY -->
+<section class="card" id="notinrepo">
+  <header>
+    <span class="chip warm">Figure 7 · §3.4 · §3.5</span>
+    <h2>In the paper, not in the repo</h2>
+    <p class="lede">Two results have no matching code. A good walkthrough says so.</p>
+  </header>
+  <div class="cols">
+    <div class="col paper">
+      <h3>What the paper claims</h3>
+      <img class="fig" src="figs/7_quantization_pdf.svg" alt="Figure 7: quantization compatibility">
+      <p class="cap"><b>Figure 7 / §3.4:</b> W8A8 post-training quantization keeps most of
+      the accuracy (the sub-1B design is "quantization-friendly").</p>
+      <p><b>§3.5:</b> knowledge distillation from a LLaMA-v2 7B teacher (soft labels)
+      lifts the small models further.</p>
+    </div>
+    <div class="col code">
+      <h3>What the repo contains</h3>
+      <p><b>No quantization code</b> <span class="badge-no">0 matches</span><br>
+      Quantization is applied externally (e.g. ExecuTorch / Hugging Face tooling) to the
+      exported checkpoint. The design choices that help — no bias terms, shared embeddings,
+      SwiGLU — are in the model code shown above.</p>
+      <p><b>No distillation code</b> <span class="badge-no">0 matches</span><br>
+      A grep for <code>distill</code>, <code>teacher</code>, <code>soft label</code> across
+      the repo returns nothing. The distillation runs are not open-sourced.</p>
+    </div>
+  </div>
+  <div class="link"><b>The link.</b> None — and that is the finding. When a paper-to-code tool
+  finds no code, it should say "not in the repo" instead of inventing a connection.</div>
+</section>
+
+</div>
+
+<footer><div class="wrap">
+  <b>How this page was made.</b> Workshop demo for the Ernesto introduction (REDS).
+  One agent received two URLs — the paper and the repo — and the instruction:
+  "build a web UI that teaches the paper; for each key figure, show the matching code
+  from the repo and how the two connect."
+  <ul class="src">
+    <li>Paper: <a href="https://arxiv.org/abs/2402.14905">arXiv:2402.14905v2</a> (Liu et al., Meta, ICML 2024). Figures served from arXiv HTML, v2.</li>
+    <li>Code: <a href="https://github.com/facebookresearch/MobileLLM">facebookresearch/MobileLLM</a>, commit of 2026-10-27. Line numbers refer to that commit.</li>
+    <li>License note: the repo is under the FAIR Noncommercial Research License. This page quotes code for teaching; reuse elsewhere follows that license.</li>
+    <li>Every "paper says" claim carries its figure/section in the chip above it; every "code does" claim carries a file and line.</li>
+  </ul>
+</div></footer>
+
+<script>
+  // highlight the nav chip for the section in view
+  const links = [...document.querySelectorAll('nav a')];
+  const sections = links.map(a => document.querySelector(a.getAttribute('href')));
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active',
+          a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, {rootMargin: '-30% 0px -60% 0px'});
+  sections.forEach(s => s && obs.observe(s));
+</script>
+</body>
+</html>

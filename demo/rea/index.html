@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>REA — Reverse Engineer Anything · Intro</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-soft: #11151f;
+    --bg-card: #151b27;
+    --line: #232b3b;
+    --text: #e6ebf4;
+    --muted: #93a0b5;
+    --accent: #e8483f;
+    --accent-soft: #ff6b5e;
+    --green: #4ecb71;
+    --blue: #58a6ff;
+    --amber: #e3b341;
+    --mono: "SFMono-Regular", "JetBrains Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: #1c2433;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #ffd9a0;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(900px 300px at 20% -50%, rgba(232, 72, 63, 0.14), transparent),
+      var(--bg-soft);
+    padding: 72px 0 56px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(34px, 6vw, 56px); letter-spacing: -0.02em; }
+  h1 .thin { color: var(--muted); font-weight: 300; }
+  .tagline {
+    margin: 18px auto 0;
+    max-width: 640px;
+    font-size: 18px;
+    color: var(--muted);
+  }
+  .tagline strong { color: var(--text); font-weight: 600; }
+  .badges { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 5px 14px;
+  }
+  .badge b { color: var(--text); font-weight: 600; }
+  .hero-links { margin-top: 26px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent); text-decoration: none; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn.primary:hover { background: var(--accent-soft); }
+
+  /* ---------- sections ---------- */
+  section { padding: 64px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .sec-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin-bottom: 10px;
+  }
+  h2 { font-size: 30px; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 720px; }
+  .lead strong { color: var(--text); }
+
+  /* cards */
+  .grid { display: grid; gap: 16px; margin-top: 30px; }
+  .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h3 { font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }
+  .card p { font-size: 14.5px; color: var(--muted); }
+  .card p strong { color: var(--text); font-weight: 600; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+  .dot.red { background: var(--accent); }
+  .dot.green { background: var(--green); }
+  .dot.blue { background: var(--blue); }
+  .dot.amber { background: var(--amber); }
+  .card .req {
+    display: inline-block; margin-top: 12px;
+    font-family: var(--mono); font-size: 11.5px;
+    color: var(--muted); border: 1px dashed var(--line);
+    border-radius: 6px; padding: 3px 9px;
+  }
+  .card .req.builtin { color: var(--green); border-color: rgba(78, 203, 113, 0.4); }
+
+  /* flow */
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 30px; counter-reset: step; }
+  .step {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 18px 18px;
+  }
+  .step::before {
+    counter-increment: step;
+    content: "0" counter(step);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-soft);
+    background: rgba(232, 72, 63, 0.12);
+    border: 1px solid rgba(232, 72, 63, 0.35);
+    border-radius: 8px;
+    display: inline-block;
+    padding: 3px 9px;
+    margin-bottom: 12px;
+  }
+  .step h3 { font-size: 15.5px; margin-bottom: 7px; }
+  .step p { font-size: 13.5px; color: var(--muted); }
+  .note {
+    margin-top: 22px;
+    font-size: 14px;
+    color: var(--muted);
+    border-left: 3px solid var(--green);
+    background: rgba(78, 203, 113, 0.06);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+  }
+  .note strong { color: var(--green); }
+
+  /* code blocks */
+  .cmd {
+    margin-top: 14px;
+    position: relative;
+  }
+  pre {
+    background: #0d1119;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #d7e0ef;
+  }
+  pre .cmt { color: #5b6878; }
+  pre .prompt { color: var(--green); }
+  .copy {
+    position: absolute; top: 8px; right: 8px;
+    font-family: var(--mono); font-size: 11px;
+    background: var(--bg-card);
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .copy:hover { color: var(--text); border-color: var(--muted); }
+  .copy.ok { color: var(--green); border-color: var(--green); }
+
+  /* ask card */
+  .ask {
+    margin-top: 16px;
+    background: linear-gradient(135deg, rgba(232,72,63,0.08), rgba(88,166,255,0.05));
+    border: 1px solid rgba(232, 72, 63, 0.35);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .ask .who { font-family: var(--mono); font-size: 12px; color: var(--accent-soft); margin-bottom: 8px; }
+  .ask .say { font-size: 15.5px; font-style: italic; }
+  .ask .say em { color: var(--muted); font-style: normal; font-family: var(--mono); font-size: 13px; }
+
+  /* showcase */
+  .case h3 .tag {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--muted); border: 1px solid var(--line);
+    border-radius: 5px; padding: 2px 8px; margin-left: auto;
+  }
+  .case .result {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--green);
+  }
+  .case .result::before { content: "↳ "; color: var(--muted); }
+
+  /* fine print */
+  .fineprint .card { padding: 16px 18px; }
+  .fineprint .card p { font-size: 13.5px; }
+  .fineprint h3 { font-size: 14.5px; }
+
+  footer {
+    padding: 40px 0 56px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer .links { margin-top: 12px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-family: var(--mono); font-size: 12.5px; }
+  footer .src { margin-top: 18px; font-size: 12px; color: #5b6878; }
+
+  /* investigation figure (seed: repo figure rea-investigation-flow.svg) */
+  .fig { margin-top: 30px; }
+  .fig svg { width: 100%; height: auto; display: block; }
+  .fig .cap { margin-top: 10px; font-size: 12.5px; color: #5b6878; }
+  .fig [class^="f-"] { opacity: .5; animation: fig-pulse 6s linear infinite; }
+  .f-b1 { animation-delay: 0s; }
+  .f-a1 { animation-delay: .6s; }
+  .f-b2 { animation-delay: 1.2s; }
+  .f-at { animation-delay: 1.8s; }
+  .f-tools { animation-delay: 2.4s; }
+  .f-a2 { animation-delay: 3s; }
+  .f-b3 { animation-delay: 3.6s; }
+  .f-a3 { animation-delay: 4.2s; }
+  .f-b4 { animation-delay: 4.8s; }
+  .f-afu { animation-delay: 5.4s; }
+  @keyframes fig-pulse {
+    0%, 100% { opacity: .5; }
+    6% { opacity: 1; }
+    14% { opacity: .5; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fig [class^="f-"] { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">workshop · intro level</div>
+    <h1>REA <span class="thin">— Reverse Engineer Anything</span></h1>
+    <p class="tagline">
+      One MCP server + CLI that gives your AI agent superpowers for reverse engineering:
+      <strong>see a feature you like, and understand how it works — down to the binary level.</strong>
+      No source code required.
+    </p>
+    <div class="badges">
+      <span class="badge">npm <b>rea-agents</b> v6.8.0</span>
+      <span class="badge">license <b>MIT</b></span>
+      <span class="badge">needs <b>Node 22 / 24 / 26</b> + npm</span>
+      <span class="badge">analysis runs <b>locally</b></span>
+    </div>
+    <div class="hero-links">
+      <a class="btn primary" href="https://github.com/morluto/rea" target="_blank" rel="noopener">github.com/morluto/rea</a>
+      <a class="btn" href="https://rea.tools/" target="_blank" rel="noopener">rea.tools</a>
+      <a class="btn" href="#use">Jump to “use it yourself”</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHAT ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">1 · What it is</div>
+    <h2>Reverse engineering, plugged into your AI agent</h2>
+    <p class="lead">
+      REA connects a coding agent (Claude Code, Codex, Cursor, Gemini CLI, and many others) to a
+      toolbox for inspecting software <strong>without its source code</strong> — native binaries,
+      JavaScript &amp; Electron apps, .NET assemblies, websites, Android APKs, network captures,
+      databases and dozens more formats. You ask a question about an app’s feature; the agent
+      investigates the real file and comes back with an answer, <strong>plus the evidence</strong>
+      (code, references, strings) and the known limitations of each conclusion.
+    </p>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3><span class="dot red"></span>Agent-first, but a real CLI</h3>
+        <p>Same investigation workflows over <strong>MCP</strong> (for agents) and <strong>the terminal</strong>.
+        <code>npx rea-agents setup</code> registers it with your agent; <code>rea …</code> works standalone.</p>
+      </div>
+      <div class="card">
+        <h3><span class="dot blue"></span>Many targets, one interface</h3>
+        <p>Native binaries, JS/Electron, .NET, APKs, websites, HAR/pcap captures, SQLite, Go, Rust,
+        WASM, ML model files, firmware, PyInstaller, Godot, IL2CPP… one consistent toolset.</p>
+      </div>
+      <div class="card">
+        <h3><span class="dot green"></span>Evidence, not vibes</h3>
+        <p>Findings ship with the supporting code, symbols and references — and explicit statements of
+        what <em>could not</em> be determined. Useful output you can verify.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">2 · How it works</div>
+    <h2>The investigation loop</h2>
+    <p class="lead">REA is not a standalone decompiler — it orchestrates analysis for your agent.</p>
+    <div class="fig">
+      <svg viewBox="0 150 1774 690" role="img" aria-labelledby="fig-title fig-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="fig-title">REA investigation flow</title>
+        <desc id="fig-desc">Ask a question about a local target. REA inspects and traces through local analysis adapters, returns evidence, and supports follow-up questions as your agent explains, implements and tests.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#93a0b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></marker>
+          <marker id="blue-arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L9 6 L1 11" fill="none" stroke="#58a6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></marker>
+        </defs>
+        <g font-family="Arial, Helvetica, sans-serif">
+          <g class="f-b1">
+            <rect x="28" y="282" width="384" height="255" rx="15" fill="none" stroke="#232b3b" stroke-width="3.5"/>
+            <text x="220" y="365" font-size="50" font-weight="700" fill="#e6ebf4" text-anchor="middle">1. Ask</text>
+            <text x="220" y="435" font-size="31" fill="#93a0b5" text-anchor="middle">Your agent + local target</text>
+            <text x="220" y="496" font-size="31" fill="#93a0b5" text-anchor="middle">App / binary / browser</text>
+          </g>
+          <path class="f-a1" d="M414 410 H469" fill="none" stroke="#93a0b5" stroke-width="4" marker-end="url(#arrow)"/>
+          <g class="f-b2">
+            <rect x="477" y="282" width="377" height="255" rx="15" fill="none" stroke="#58a6ff" stroke-width="3.5"/>
+            <text x="665" y="357" font-size="37" font-weight="700" fill="#e6ebf4" text-anchor="middle">2. Inspect &amp; trace</text>
+            <text x="665" y="454" font-size="80" font-weight="700" fill="#58a6ff" text-anchor="middle">REA</text>
+            <text x="665" y="508" font-size="35" fill="#93a0b5" text-anchor="middle">CLI / MCP</text>
+          </g>
+          <path class="f-at" d="M665 615 V545" fill="none" stroke="#93a0b5" stroke-width="4" marker-end="url(#arrow)"/>
+          <g class="f-tools">
+            <rect x="453" y="617" width="425" height="205" rx="15" fill="none" stroke="#232b3b" stroke-width="3.5"/>
+            <text x="665" y="690" font-size="42" font-weight="700" fill="#e6ebf4" text-anchor="middle">Analysis tools</text>
+            <text x="665" y="755" font-size="32" fill="#93a0b5" text-anchor="middle">Local analysis adapters</text>
+          </g>
+          <path class="f-a2" d="M856 410 H911" fill="none" stroke="#93a0b5" stroke-width="4" marker-end="url(#arrow)"/>
+          <g class="f-b3">
+            <rect x="919" y="282" width="380" height="255" rx="15" fill="none" stroke="#232b3b" stroke-width="3.5"/>
+            <text x="1109" y="363" font-size="35" font-weight="700" fill="#e6ebf4" text-anchor="middle">3. Read the evidence</text>
+            <text x="1109" y="438" font-size="32" fill="#93a0b5" text-anchor="middle">Code / references /</text>
+            <text x="1109" y="480" font-size="32" fill="#93a0b5" text-anchor="middle">unknowns</text>
+          </g>
+          <path class="f-a3" d="M1301 410 H1356" fill="none" stroke="#93a0b5" stroke-width="4" marker-end="url(#arrow)"/>
+          <g class="f-b4">
+            <rect x="1364" y="282" width="382" height="255" rx="15" fill="none" stroke="#232b3b" stroke-width="3.5"/>
+            <text x="1555" y="362" font-size="34" font-weight="700" fill="#e6ebf4" text-anchor="middle">4. Use what you learn</text>
+            <text x="1555" y="440" font-size="53" font-weight="700" fill="#e6ebf4" text-anchor="middle">Your agent</text>
+            <text x="1555" y="496" font-size="30" fill="#93a0b5" text-anchor="middle">Explain / implement / test</text>
+          </g>
+          <text class="f-afu" x="1118" y="199" font-size="33" font-weight="700" fill="#58a6ff" text-anchor="middle">Follow-up question</text>
+          <path class="f-afu" d="M1555 280 V248 Q1555 217 1524 217 H696 Q665 217 665 248 V273" fill="none" stroke="#58a6ff" stroke-width="4" marker-end="url(#blue-arrow)"/>
+        </g>
+      </svg>
+      <div class="cap">The loop, adapted from the REA repo's own figure (<span style="font-family:var(--mono)">website/public/assets/figures/rea-investigation-flow.svg</span>).</div>
+    </div>
+    <div class="flow">
+      <div class="step">
+        <h3>You ask</h3>
+        <p>“How does <em>search</em> work in the Notes app? Show me the evidence.”</p>
+      </div>
+      <div class="step">
+        <h3>Agent calls REA</h3>
+        <p>Your agent invokes REA tools over MCP — or you run the equivalent CLI command yourself.</p>
+      </div>
+      <div class="step">
+        <h3>REA inspects &amp; traces</h3>
+        <p>Local analysis: built-in static parsers (JS, .NET, ELF, PE, APK, …) and, for deep native
+        decompilation, your Hopper, Ghidra or IDA installation. REA starts engines as needed.</p>
+      </div>
+      <div class="step">
+        <h3>Findings + evidence back</h3>
+        <p>Pseudocode, modules, calls, strings, references — with limitations noted. The agent explains,
+        then can implement and test a similar feature in <em>your</em> project.</p>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Local &amp; auditable:</strong> analysis runs on your machine against local targets —
+      REA does not upload your apps. (Your agent’s own model provider has its own data policy.)
+    </div>
+  </div>
+</section>
+
+<!-- ============ TARGETS ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">3 · What you can analyze</div>
+    <h2>From executables to websites</h2>
+    <p class="lead">The headline categories — the repo lists 36 target types in total.
+    <code>built-in</code> means no extra decompiler or engine required.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3><span class="dot red"></span>Native binaries</h3>
+        <p>Pseudocode, assembly, strings, symbols, calls and references from compiled executables
+        (ELF, PE, Mach-O, DOS 16-bit…).</p>
+        <span class="req">needs Hopper, Ghidra or IDA</span>
+      </div>
+      <div class="card">
+        <h3><span class="dot green"></span>JavaScript / Electron apps</h3>
+        <p>Modules, imports, source maps, routes, IPC boundaries and native add-on relationships —
+        from an extracted app directory, or the ASAR archive (the packed form of an Electron app).</p>
+        <span class="req builtin">built-in · Node + npm</span>
+      </div>
+      <div class="card">
+        <h3><span class="dot green"></span>.NET assemblies</h3>
+        <p>Metadata, bytecode (CIL) instructions, declared native dependencies and build comparisons.
+        Static only — the app never runs.</p>
+        <span class="req builtin">built-in · static</span>
+      </div>
+      <div class="card">
+        <h3><span class="dot blue"></span>Android APKs &amp; devices</h3>
+        <p>Manifest, classes, decompiled methods, signatures (v1–v3.1); plus live devices over adb
+        (packages, logs, dumps, screen capture).</p>
+        <span class="req">headless JADX + JDK · adb</span>
+      </div>
+      <div class="card">
+        <h3><span class="dot blue"></span>Websites &amp; networks</h3>
+        <p>Page structure, scripts and screenshots via a Chrome-family browser; HAR / SAZ / pcap
+        captures decoded into requests, responses and source locations.</p>
+        <span class="req">Chrome-family browser · tshark for pcap</span>
+      </div>
+      <div class="card">
+        <h3><span class="dot amber"></span>The long tail</h3>
+        <p>Go &amp; Rust binaries, WASM, EVM bytecode, ML models (GGUF/safetensors), IL2CPP, Godot PCK,
+        firmware, PyInstaller, GPU code objects, SQLite databases, Apple crash reports, kernel modules…</p>
+        <span class="req builtin">mostly built-in static</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE ============ -->
+<section id="use">
+  <div class="wrap">
+    <div class="sec-label">4 · Use it yourself</div>
+    <h2>Three ways in</h2>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>① Into your AI agent (recommended)</h3>
+        <p>Prerequisite: Node.js 22/24/26 + npm. Setup registers REA’s MCP server and workflow
+        instructions with your agent (with backups), then you restart the agent.</p>
+        <div class="cmd">
+          <button class="copy" type="button">copy</button>
+<pre><span class="cmt"># one command — pick your agent, review &amp; approve changes</span>
+<span class="prompt">$</span> npx rea-agents setup</pre>
+        </div>
+        <div class="ask">
+          <div class="who">you → your agent</div>
+          <div class="say">“Understand how search works in the Notes app, show me the evidence,
+          and build a similar feature for my project.”</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>② From the terminal</h3>
+        <p>Same workflows, no agent needed. Handy for scripting and for quick static analysis of a
+        JS/Electron app folder or ASAR:</p>
+        <div class="cmd">
+          <button class="copy" type="button">copy</button>
+<pre><span class="cmt"># one-off</span>
+<span class="prompt">$</span> npx -y rea-agents@latest analyze-javascript-application /absolute/path/to/app --json
+
+<span class="cmt"># or install the `rea` command permanently</span>
+<span class="prompt">$</span> npm install --global rea-agents
+<span class="prompt">$</span> rea --help</pre>
+        </div>
+        <div class="cmd">
+          <button class="copy" type="button">copy</button>
+<pre><span class="cmt"># REA changes fast — keep it fresh</span>
+<span class="prompt">$</span> rea update</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Native decompilers:</strong> deep binary analysis uses <em>your</em> Hopper, Ghidra or
+      IDA — you must be legally licensed for any commercial tool. Setup can optionally install
+      Hopper (with your approval). Static JavaScript and .NET analysis need no native engine at all.
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHOWCASE ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">5 · Where to go next</div>
+    <h2>What people have done with it</h2>
+    <div class="grid cols-3">
+      <div class="card case">
+        <h3>DX-Ball <span class="tag">native x86</span></h3>
+        <p>Followed a sound call into a position→pan helper, inspected instructions, and turned
+        incomplete pseudocode into C.</p>
+        <div class="result">reconstruction passed 3,205 original x86 cases, matched all 63 function bytes</div>
+      </div>
+      <div class="card case">
+        <h3>Notion <span class="tag">Electron</span></h3>
+        <p>Traced the clipboard feature from the renderer API through preload and IPC into the main
+        process, down to the rich clipboard format.</p>
+        <div class="result">full cross-process clipboard bridge mapped with evidence</div>
+      </div>
+      <div class="card case">
+        <h3>TH04 <span class="tag">16-bit DOS</span></h3>
+        <p>Inspected PC-98 16-bit instructions of a Touhou game, recovered the fixed and aimed
+        bullet-ring angle math, rebuilt it in C++.</p>
+        <div class="result">reconstruction compared against the historical compiler output</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 16px;">
+      <h3><span class="dot amber"></span>Beyond intro: RL training environments</h3>
+      <p>Record a web app session, and REA turns its API into tools an AI agent can call,
+      exporting a runnable environment for RL training or agent evaluation.
+      The <a href="https://rea.tools/guides/rl-environments/" target="_blank" rel="noopener">RL environments guide</a>
+      walks through the steps (it needs AgentEnv and Docker).</p>
+    </div>
+
+    <p class="lead" style="margin-top: 22px;">
+      Ready to go deeper? The
+      <a href="https://rea.tools/guides/" target="_blank" rel="noopener">guides</a>
+      walk through real targets step by step, and the
+      <a href="https://rea.tools/showcase/" target="_blank" rel="noopener">showcases</a>
+      are full case studies, one per target.
+    </p>
+  </div>
+</section>
+
+<!-- ============ FINE PRINT ============ -->
+<section class="fineprint">
+  <div class="wrap">
+    <div class="sec-label">6 · Good to know</div>
+    <h2>Fine print, in one glance</h2>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>Lawful use only</h3>
+        <p>REA is for research, education, interoperability, software preservation, and analyzing
+        software <strong>you own or are authorized to examine</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>Bring your own decompiler license</h3>
+        <p>IDA Pro, Hopper and JEB are commercial. REA grants no license, key or activation —
+        use legally obtained copies.</p>
+      </div>
+      <div class="card">
+        <h3>Trust but verify</h3>
+        <p>Results include explicit limitations; decompilation is reconstruction, not ground truth.
+        Verify conclusions against the evidence before relying on them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Intro page for the AI4REDS workshop · built from the REA repo &amp; README (v6.8.0)</div>
+    <div class="links">
+      <a href="https://github.com/morluto/rea" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://rea.tools/" target="_blank" rel="noopener">rea.tools</a>
+      <a href="https://rea.tools/guides/" target="_blank" rel="noopener">Guides</a>
+      <a href="https://rea.tools/showcase/" target="_blank" rel="noopener">Showcases</a>
+      <a href="https://www.npmjs.com/package/rea-agents" target="_blank" rel="noopener">npm</a>
+    </div>
+    <div class="src">
+      Deep-dive docs live in the repo: <span style="font-family:var(--mono)">docs/installation.md</span> ·
+      <span style="font-family:var(--mono)">docs/cli.md</span> ·
+      <span style="font-family:var(--mono)">docs/mcp-contracts.md</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // copy buttons for code blocks — 8 lines of JS
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.parentElement.querySelector("pre");
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        btn.textContent = "copied ✓";
+        btn.classList.add("ok");
+        setTimeout(function () { btn.textContent = "copy"; btn.classList.remove("ok"); }, 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

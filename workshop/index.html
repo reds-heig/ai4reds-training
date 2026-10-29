@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ernesto — Introduction Workshop</title>
+<style>
+:root{
+  --bg:#0b1220; --card:#111a2c; --card2:#0d1524; --border:#243352;
+  --fg:#e8edf7; --muted:#8b98b8;
+  --indigo:#818cf8; --green:#34d399; --sky:#38bdf8; --amber:#fbbf24;
+  --pink:#f472b6; --violet:#a78bfa; --red:#f87171; --teal:#2dd4bf;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif;font-size:16px;line-height:1.5}
+.mono{font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--indigo);z-index:10}
+#bar{display:flex;gap:8px;padding:14px 24px 0;flex-wrap:wrap;align-items:center}
+.tab{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;font-size:13.5px;font-family:inherit}
+.tab:hover{color:var(--fg)}
+.tab.on{background:color-mix(in srgb, var(--indigo) 18%, transparent);color:var(--fg);
+  border-color:color-mix(in srgb, var(--indigo) 55%, transparent)}
+.tab:disabled{opacity:.35;cursor:default}
+#dots{display:flex;gap:6px;margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.dot.on{background:var(--indigo)}
+#stage{max-width:1280px;margin:0 auto;padding:26px 24px 60px;min-height:calc(100vh - 64px)}
+.screen{display:none}
+.screen.on{display:block}
+.eyebrow{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:44px;margin:6px 0 10px;letter-spacing:-.01em}
+.sub{font-size:28px;color:var(--muted)}
+.note{font-size:18px;color:var(--muted);margin-top:16px}
+#test-report{position:fixed;bottom:0;left:0;white-space:pre;font-family:ui-monospace,Menlo,monospace;
+  font-size:14px;background:var(--card2);color:var(--fg);padding:8px 12px;z-index:20}
+h2{font-size:36px;margin:0 0 4px}
+.lead{font-size:19px;color:var(--muted);margin-bottom:12px;max-width:860px}
+.land{margin-top:20px;padding:10px 14px;border-left:3px solid var(--indigo);background:var(--card);font-size:18px;border-radius:0 8px 8px 0}
+.goal{font-size:22px;font-weight:600;color:var(--red);margin:14px 0 18px}
+.motive{opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:10px;padding:12px 16px;font-size:19px;margin-bottom:10px}
+.motive.show{opacity:1;transform:none}
+.skhead{display:flex;align-items:center;gap:16px;margin:14px 0 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:15px;color:var(--muted);opacity:0;transition:opacity .4s}
+.skhead.show{opacity:1}
+.skrow{display:flex;gap:16px;align-items:stretch}
+#sk-map{width:280px;flex:none;display:flex;flex-direction:column;gap:8px;opacity:0;transition:opacity .4s}
+#sk-map.show{opacity:1}
+.skm{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;cursor:pointer}
+.skm b{display:block;font-size:17px;color:var(--fg)}
+.skm span{font-size:15px;color:var(--muted)}
+.skm.sel{border-color:var(--red);background:var(--card2)}
+#sk-main{position:relative;flex:1;height:66vh;overflow:hidden;background:var(--card2);border:1px solid var(--border);border-radius:12px;opacity:0;transition:opacity .4s}
+#sk-main.show{opacity:1}
+#sk-main.sk-scroll{overflow-y:auto}
+#sk-doc{position:relative;transform-origin:top left;width:fit-content;padding:16px 18px 70px;will-change:transform}
+#sk-doc .sktag{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:18px 0 6px}
+#sk-doc article:first-child .sktag{margin-top:0}
+#sk-doc .skh{font-size:16px;margin:8px 0 6px;color:var(--fg)}
+#sk-doc .skl{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;line-height:1.55;color:var(--muted);white-space:pre-wrap}
+#sk-doc .hl{background:rgba(251,191,36,.18);color:var(--fg);border-radius:3px}
+.skmore{opacity:.55;font-style:italic;margin-top:4px}
+#sk-cap{position:absolute;left:0;right:0;bottom:0;background:rgba(11,18,32,.94);border-top:1px solid var(--border);padding:10px 16px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.archwrap{display:grid;grid-template-columns:460px 1fr;gap:26px;align-items:start}
+.chips-col{display:flex;flex-direction:column;gap:8px}
+.chip{opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 13px}
+.chip.show{opacity:1;transform:none}
+.chip b{display:block;font-size:14.5px;color:var(--indigo)}
+.chip span{font-size:13px;color:var(--muted)}
+.nbox{fill:var(--card);stroke:var(--border);stroke-width:1.5;transition:stroke .5s}
+.node{opacity:.5;transition:opacity .5s}
+.node.lit{opacity:1}
+.node.lit .nbox{stroke:var(--indigo)}
+.nt{fill:var(--fg);font-size:14px;font-weight:600;font-family:inherit}
+.ns{fill:var(--muted);font-size:13px;font-family:inherit}
+.loopwrap{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:start}
+.loop-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:10px}
+.lpill{background:var(--card);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:13.5px}
+.lpill.repeat{border-style:dashed;color:var(--muted)}
+.larr{color:var(--muted)}
+.term{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.term .line{opacity:0;transition:opacity .3s;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;margin:5px 0}
+.term .line.show{opacity:1}
+.term .line .yes{color:var(--green)}
+.gate{margin-top:12px;font-size:14px;color:var(--muted);opacity:.5;transition:opacity .4s}
+.gate.on{opacity:1;color:var(--amber);font-weight:600}
+.cards{display:flex;gap:10px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14.5px;transition:border-color .4s}
+.card.hit{opacity:1;border-color:var(--indigo)}
+.card-body{display:none;font-size:13.5px;color:var(--muted);margin-top:6px}
+.card-body.show{display:block}
+.skbar{height:6px;background:var(--card2);border:1px solid var(--border);border-radius:4px;margin-top:14px;overflow:hidden;width:240px}
+.skbar i{display:block;height:100%;width:0;background:var(--indigo);transition:width .6s}
+.quote{font-size:14px;color:var(--muted);margin-top:12px}
+.taskbtns{display:flex;gap:8px;margin:0 0 14px}
+.taskbtn{padding:7px 13px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13.5px;font-family:inherit}
+.taskbtn:hover{color:var(--fg)}
+.secwrap{display:grid;grid-template-columns:340px 1fr;gap:26px;align-items:start}
+#sec-levers{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+#sec-levers li{padding:9px 13px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:14.5px}
+#sec-levers li::before{content:"✓  ";color:var(--green)}
+.webpath{stroke:var(--border);stroke-dasharray:6 5;transition:stroke .5s}
+.webpath.on{stroke:var(--amber)}
+.secbadge{margin-top:10px;display:inline-block;padding:6px 12px;border-radius:8px;border:1px solid var(--red);color:var(--red);font-size:13px;letter-spacing:.06em;opacity:.35;transition:opacity .5s}
+.secbadge.on{opacity:1}
+/* wrap-up: wink screenshot centered, quote, two links */
+#s-5-1.on{display:flex;flex-direction:column;justify-content:center}
+/* the title-slide face, frozen in the wink/kiss pose: no JS, no motion */
+#wu-ernesto{width:280px;height:280px;margin:14px auto 0;animation:none;opacity:0;transition:opacity .4s}
+#wu-ernesto.show{opacity:1}
+#wu-ernesto .er-glow{animation:none}
+#wu-ernesto .eye{animation:none}
+#wu-ernesto .er-mouth{opacity:1;transform:translate(34px,12px) rotate(28deg) scale(1.35)}
+.wu-quote{font-size:26px;text-align:center;margin:18px auto 14px;max-width:860px;opacity:0;transition:opacity .4s}
+.wu-quote.show{opacity:1}
+.wu-links{display:flex;gap:14px;justify-content:center;opacity:0;transition:opacity .4s}
+.wu-links.show{opacity:1}
+.uc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.85fr);gap:16px;align-items:start}
+.ucfig{margin:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ucfig img{display:block;width:100%;height:auto;aspect-ratio:1200/675}
+.ucfig figcaption{padding:9px 13px;font-size:15.5px;color:var(--muted);border-top:1px solid var(--border)}
+#s-1 .uc,#s-2 .uc,#s-4 .uc{align-items:stretch}
+.ucfig a{display:block}
+.ucfig img{cursor:pointer;transition:filter .2s}
+.ucfig a:hover img{filter:brightness(1.08)}
+.bignks{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.bink{padding:13px 22px;border-radius:999px;font-size:18px;text-decoration:none}
+.bink.primary{background:var(--indigo);color:#0b1220;font-weight:600}
+.bink.ghost{border:1px solid var(--border);color:var(--muted)}
+.bink:hover{opacity:.85}
+
+/* ==== title screen: hero layout + dynamic Ernesto logo (from github-pages-training/ernesto-logo.html) ==== */
+#s-00.on{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;min-height:calc(100vh - 64px - 86px)}
+#s-00::before{content:"";position:absolute;inset:-60px 0;pointer-events:none;
+  background:radial-gradient(640px 460px at 50% 26%, rgba(139,92,246,.16), transparent 70%)}
+#s-00 .eyebrow{margin:0}
+#s-00 h1{font-size:clamp(40px,5vw,44px);font-weight:800;margin:26px 0 0;letter-spacing:-.01em;line-height:1.05;
+  background:linear-gradient(180deg,#ffffff 30%,#C4B5FD);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+#s-00 .sub{margin-top:12px;font-size:28px}
+#s-00 .chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:22px 0 0;padding:0;list-style:none}
+#s-00 .chips li{font:500 13.5px/1 ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--violet);border:1px solid rgba(167,139,250,.30);border-radius:999px;
+  padding:9px 17px;background:rgba(139,92,246,.07)}
+#s-00 .note{margin-top:22px}
+.er-wrap{position:relative;width:116px;height:116px;flex:none;animation:bob 4.8s ease-in-out infinite;z-index:1}
+.er-glow{position:absolute;inset:-56px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle, rgba(139,92,246,.38), transparent 62%);
+  filter:blur(8px);animation:glowp 4.8s ease-in-out infinite}
+.er{position:absolute;inset:0;border-radius:27%;
+  background:linear-gradient(180deg,#A07CFA 0%,#7646EA 100%);
+  box-shadow:inset 0 2px 10px rgba(255,255,255,.30), inset 0 -22px 34px rgba(40,10,90,.30),
+    inset 0 0 0 1px rgba(255,255,255,.14), 0 24px 60px rgba(91,33,182,.45)}
+.eye{position:absolute;top:33.5%;width:13.6%;height:14.5%;background:#140E26;border-radius:50%;
+  animation:blink 5.6s infinite;transition:transform .12s ease}
+.eye.l{left:29.3%}.eye.r{right:29.3%}
+.eye::after{content:"";position:absolute;top:9%;left:12%;width:34%;height:34%;
+  background:rgba(255,255,255,.92);border-radius:50%}
+.eye.wink{animation:none;transform:scaleY(.12)}
+.eye.wink::after{opacity:0}
+.er-mouth{position:absolute;left:42.5%;top:54%;width:15%;height:17%;
+  transform:scale(.4);opacity:0;transform-origin:50% 50%}
+.er-mouth svg{display:block;width:100%;height:100%;overflow:visible}
+.er-mouth path{fill:none;stroke:#140E26;stroke-width:13;stroke-linecap:round}
+@keyframes bob{50%{transform:translateY(-9px)}}
+@keyframes glowp{50%{opacity:.55;transform:scale(1.07)}}
+@keyframes blink{0%,91.5%,100%{transform:scaleY(1)}94%{transform:scaleY(.12)}96.5%{transform:scaleY(1)}}
+
+/* ==== ported from github-pages-training/workshop.html (dark values) ==== */
+/* beat-0 fit (1366x768 budget) */
+#s-0-1 .archgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:start}
+#s-0-1 .card{padding:8px 14px}
+#s-0-1 #svgArch{max-width:710px;margin:0 auto}
+#s-0-2 .term{height:280px}
+#s-0-2 #svgLoop{max-width:405px}
+#s-0-7 #svgSec{max-width:800px}
+#s-0-2 .card{padding:8px 14px}
+#s-0-2 .wnote{margin-top:6px}
+#s-0-2 h2{font-size:42px}
+#s-0-2 .lead{font-size:21px}
+#stage:has(#s-0-2.on){padding-bottom:16px}
+
+/* projector type scale for beat 0: readable from the back of the room */
+.h0 .eyebrow{font-size:15px}
+/* beat 0 screens: projection contrast. White text, bright boxes, visible
+   borders. Layers: page < card < diagram box. No effect outside .h0. */
+.h0{--muted:#d8e1f0;--border:#5a6ea3}
+.h0 .card{background:#1e2d50}
+.h0 .box{fill:#324471}
+.h0 .secb{fill:#2b3d68}
+.h0 h2{font-size:44px;line-height:1.08}
+.h0 .lead{font-size:23px;line-height:1.4;max-width:none}
+.h0 .card{font-size:18px}
+.h0 .wnote{font-size:18px}
+.h0 .btn{font-size:17px;padding:8px 14px}
+.h0 .detail{min-height:0}
+.h0 .detail .dh{font-size:21px}
+.h0 .detail .dh span{font-size:14px}
+.h0 .detail p{font-size:20px;line-height:1.45}
+.h0 .status{font-size:18px}
+.h0 .term{font-size:17px;line-height:1.6}
+.h0 .gatebar{font-size:16px;padding:12px 14px}
+.h0 .tg{font-size:14px}
+.h0 .t1{font-size:24px}
+.h0 .t2{font-size:20px}
+.h0 .elbl{font-size:18px}
+.h0 .skname{font-size:16px}
+.h0 .skdesc{font-size:15px}
+.h0 .sktok{font-size:13px}
+.h0 .skcard{padding:8px 12px}
+.h0 .skstatus{font-size:15px}
+.h0 .skbody{font-size:14px}
+.h0 .skbody .bt{font-size:17px}
+.h0 .soulq{font-size:19px}
+.h0 .soula{font-size:22px;line-height:1.55}
+.h0 .frm{font-size:17px}
+.h0 .pprev{font-size:14px}
+.h0 .frampill{font-size:17px}
+.h0 .planbox{font-size:17px}
+.h0 .legend{font-size:17px}
+.h0 .cstat{font-size:15px}
+.h0 .comp{font-size:18px;padding:12px 14px}
+.h0 .nineb{font-size:15px}
+.h0 .chk{font-size:17px}
+.h0 .lim{font-size:17px}
+.h0 .seg{font-size:13px}
+.h0 .cbar{height:44px}
+.h0 .pln.ramble{color:color-mix(in srgb, var(--muted) 55%, var(--fg))}
+/* projector windows (tall): render the diagrams at 1:1 viewBox scale so
+   their 18-24px text really is 18-24px on screen. laptops keep compact sizes */
+@media (min-height:950px){
+  #stage{padding-bottom:40px}
+  .h0 .lead{margin-bottom:0}
+  #s-0-1 .archgrid{grid-template-columns:1fr;gap:10px}
+  #s-0-1 #svgArch{max-width:1120px}
+  #s-0-1 .detail{margin-top:8px;padding-top:8px}
+  #s-0-2 #svgLoop{max-width:640px;margin:0 auto}
+  #s-0-7 #svgSec{max-width:1100px}
+}
+#prompt-1 .line,#prompt-2 .line,#prompt-3 .line,#prompt-4 .line{font-size:22px;line-height:1.38;margin:2px 0;overflow-wrap:anywhere}
+/* use-case prompt slides: keep the 22px prompt inside the 768 budget */
+#s-1 .lead,#s-2 .lead,#s-3-2 .lead,#s-4 .lead{margin-bottom:8px}
+#s-1 .goal,#s-2 .goal,#s-4 .goal{margin:10px 0 12px}
+#s-1 .bignks,#s-2 .bignks,#s-4 .bignks{margin-top:10px}
+#s-1 .land,#s-2 .land,#s-3-2 .land,#s-4 .land{margin-top:12px}
+/* short windows (laptop projection): compress the use-case slides so the
+   22px prompt, the screenshot row, and the landing line all stay on screen */
+@media (max-height:840px){
+  #stage{padding:16px 24px}
+  #s-1 h2,#s-2 h2,#s-3-2 h2,#s-4 h2{font-size:26px}
+  #s-1 .uc,#s-2 .uc,#s-4 .uc{grid-template-columns:minmax(0,1.3fr) minmax(0,0.85fr)}
+  #prompt-1 .line,#prompt-2 .line,#prompt-4 .line{line-height:1.27}
+  #s-1 .bink,#s-2 .bink,#s-4 .bink{padding:7px 14px}
+  #s-1 .goal,#s-2 .goal,#s-4 .goal{font-size:17px;margin:6px 0 8px}
+  #s-1 .bignks,#s-2 .bignks,#s-4 .bignks{margin-top:8px}
+  #s-1 .land,#s-2 .land,#s-3-2 .land,#s-4 .land{margin-top:10px;padding:8px 14px;font-size:16px}
+}
+/* very short windows (laptop screen under browser UI): same 22px prompt,
+   tighter line boxes and a capped screenshot keep the slide on one screen */
+@media (max-height:730px){
+  #stage{padding:12px 24px}
+  #s-1 h2,#s-2 h2,#s-3-2 h2,#s-4 h2{font-size:22px}
+  #s-1 .lead,#s-2 .lead,#s-3-2 .lead,#s-4 .lead{max-width:none}
+  #prompt-1 .line,#prompt-2 .line,#prompt-4 .line{line-height:1.15}
+  #s-1 .ucfig img,#s-2 .ucfig img,#s-4 .ucfig img{max-height:240px;width:auto;margin:0 auto}
+  #s-1 .bink,#s-2 .bink,#s-4 .bink{padding:5px 12px}
+  #s-1 .goal,#s-2 .goal,#s-4 .goal{font-size:15px;margin:4px 0 6px}
+  #s-1 .bignks,#s-2 .bignks,#s-4 .bignks{margin-top:6px}
+  #s-1 .land,#s-2 .land,#s-3-2 .land,#s-4 .land{margin-top:8px;padding:6px 12px;font-size:14px}
+}
+#s-0-4 .skillsgrid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px}
+#s-0-4 .card{padding:8px 14px;margin-top:6px}
+#s-0-4 #skList{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#s-0-4 .skcard{padding:6px 10px;margin-bottom:2px}
+#stage:has(#s-0-4.on){padding-bottom:8px}
+#s-0-6 .card{padding:8px 14px}
+#stage:has(#s-0-6.on){padding-bottom:20px}
+#stage:has(#s-0-7.on){padding-bottom:40px}
+#s-0-7 .card{padding:8px 14px}
+#s-0-7 #svgSec{margin:0 auto}
+/* short windows: detail panel moves to the side so the diagram can grow */
+@media (max-height:949px){
+  #s-0-7 .card{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-areas:"svg detail" "btns btns";column-gap:18px}
+  #s-0-7 #svgSec{grid-area:svg}
+  #s-0-7 .secbtns{grid-area:btns}
+  #s-0-7 .detail{grid-area:detail;margin-top:0;border-top:0;padding-top:0}
+}
+/* s-0-8: risk rows */
+#s-0-8 .card{padding:12px 16px}
+#s-0-8 .riskrows{display:grid;gap:10px}
+#s-0-8 .riskrow{display:grid;grid-template-columns:100px 1fr auto;gap:14px;align-items:center;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 14px}
+#s-0-8 .rkname{font-size:18px;font-weight:700;color:var(--fg)}
+#s-0-8 .rkbody{font-size:18px;color:var(--muted);line-height:1.45}
+#s-0-8 .rkbody b{color:var(--fg)}
+#s-0-8 .rkbadge{font-size:14px;padding:4px 12px;border-radius:999px;border:1px solid;white-space:nowrap}
+#s-0-8 .rkbadge.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 45%,transparent);background:color-mix(in srgb,var(--green) 10%,transparent)}
+#s-0-8 .rkbadge.lim{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent)}
+#s-0-8 .rkbadge.risk{color:var(--red);border-color:color-mix(in srgb,var(--red) 45%,transparent);background:color-mix(in srgb,var(--red) 10%,transparent)}
+#s-0-8 .bink{display:inline-block;padding:9px 18px;font-size:16px;margin:12px 8px 0 0}
+#stage:has(#s-0-8.on){padding-bottom:8px}
+
+.card h3{margin:0 0 4px;font-size:18px}
+.kt{font-size:15px;color:var(--muted);margin:0 0 12px}
+.kt b{color:var(--fg);font-weight:600}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:10px}
+.wnote{font-size:15.5px;color:var(--muted);margin:6px 0 0}
+.btn{font-family:inherit;font-size:15px;color:var(--fg);background:var(--card2);
+  border:1px solid var(--border);border-radius:9px;padding:7px 13px;cursor:pointer}
+.btn:hover{border-color:var(--indigo)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:color-mix(in srgb, var(--indigo) 22%, transparent);border-color:color-mix(in srgb, var(--indigo) 60%, transparent)}
+.btn.ghost{background:transparent}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+/* SVG shared */
+svg{display:block;width:100%;height:auto}
+.box{fill:var(--card2);stroke:var(--border);stroke-width:1.5;transition:stroke .15s,stroke-width .15s}
+.nd{cursor:pointer}
+.nd:hover .box,.nd:focus .box,.nd.sel .box{stroke:var(--indigo);stroke-width:2.5}
+.t1{fill:var(--fg);font-size:15px;font-weight:600}
+.t2{fill:var(--muted);font-size:13.5px}
+.elbl{fill:var(--muted);font-size:13px}
+.lk{stroke:var(--border);stroke-width:1.5;fill:none}
+.lk.dash{stroke-dasharray:5 5;stroke:var(--violet)}
+.pipe{stroke:color-mix(in srgb, var(--sky) 30%, transparent);stroke-width:12;fill:none;stroke-linecap:round}
+.bNet{fill:color-mix(in srgb, var(--violet) 9%, transparent);stroke:var(--violet);stroke-dasharray:6 6;stroke-width:1.5}
+.bServer{fill:color-mix(in srgb, var(--indigo) 6%, transparent);stroke:var(--border);stroke-width:1.5}
+.bYou{stroke:color-mix(in srgb, var(--amber) 65%, var(--border))}
+.bModel{stroke:color-mix(in srgb, var(--indigo) 65%, var(--border))}
+.bHarn{stroke:color-mix(in srgb, var(--green) 65%, var(--border))}
+.bTools{stroke:color-mix(in srgb, var(--sky) 65%, var(--border))}
+.bCtx{stroke:color-mix(in srgb, var(--violet) 65%, var(--border))}
+.bRepos{stroke:color-mix(in srgb, var(--teal) 65%, var(--border))}
+.ed{stroke:var(--border);stroke-width:2;fill:none;transition:stroke .2s}
+.ed.gate{stroke:var(--pink);stroke-dasharray:6 6}
+.ed.on{stroke:var(--indigo);stroke-width:3;stroke-dasharray:7 7;animation:dashmove .8s linear infinite}
+.ed.on.gate{stroke:var(--pink)}
+.ln.on .box{stroke-width:3}
+.ln.on .bYou{stroke:var(--amber);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--amber) 55%, transparent))}
+.ln.on .bModel{stroke:var(--indigo);filter:drop-shadow(0 0 9px color-mix(in srgb, var(--indigo) 55%, transparent))}
+.ln.on .bHarn{stroke:var(--green);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--green) 55%, transparent))}
+.ln.on .bTools{stroke:var(--sky);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--sky) 55%, transparent))}
+.ln.on .bCtx{stroke:var(--violet);filter:drop-shadow(0 0 7px color-mix(in srgb, var(--violet) 55%, transparent))}
+.gatedot{fill:var(--border)}
+.gatedot.alert{fill:var(--pink);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{r:6}50%{r:9}}
+@keyframes dashmove{to{stroke-dashoffset:-28}}
+.detail{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;min-height:60px}
+.detail .dh{font-size:18px;font-weight:600;margin-bottom:3px}
+.detail .dh span{font-size:13px;color:var(--muted);font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-left:8px}
+.detail p{margin:0;font-size:16px;color:var(--muted)}
+.detail p b{color:var(--fg);font-weight:600}
+/* loop layout */
+.loopgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.term{background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:15px;line-height:1.7}
+#term{height:470px;overflow-y:auto}
+#prompt-1,#prompt-2,#prompt-3,#prompt-4{font-size:22px}
+.tl{display:flex;gap:9px;margin-bottom:9px;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tg{flex:none;min-width:66px;text-align:center;border-radius:6px;padding:1px 8px;font-size:12.5px;
+  font-weight:700;letter-spacing:.05em;align-self:flex-start;margin-top:2px}
+.tg.you{background:color-mix(in srgb, var(--amber) 16%, transparent);color:var(--amber)}
+.tg.model{background:color-mix(in srgb, var(--indigo) 16%, transparent);color:var(--indigo)}
+.tg.harness{background:color-mix(in srgb, var(--green) 16%, transparent);color:var(--green)}
+.tg.tool{background:color-mix(in srgb, var(--sky) 16%, transparent);color:var(--sky)}
+.tg.gate{background:color-mix(in srgb, var(--pink) 16%, transparent);color:var(--pink)}
+.tt{color:var(--fg)}
+.tt.dim{color:color-mix(in srgb, var(--fg) 45%, var(--muted))}
+.gatebar{display:none;margin-top:10px;border:1px solid color-mix(in srgb, var(--pink) 55%, transparent);
+  background:color-mix(in srgb, var(--pink) 10%, transparent);border-radius:10px;padding:10px 12px;
+  font-size:13px;align-items:center;gap:10px;flex-wrap:wrap}
+.gatebar.on{display:flex}
+.ctxtrack{fill:var(--border);opacity:.5}
+.ctxfill{fill:var(--violet)}
+.status{font-size:15px;color:var(--muted);margin-top:8px}
+/* section 4 : skills */
+.skillsgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.skcard{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  background:var(--card2);opacity:.75;transition:opacity .25s,border-color .25s,box-shadow .25s}
+.skcard.hit{opacity:1;border-color:var(--indigo);box-shadow:0 0 14px color-mix(in srgb, var(--indigo) 28%, transparent)}
+.skcard.dead{opacity:.4}
+.skname{font-size:14px;font-weight:700}
+.skdesc{font-size:14px;color:var(--muted);margin-top:2px}
+.sktok{font-size:12.5px;color:var(--muted);margin-top:2px;opacity:.8}
+.skload{display:inline-block;margin-top:7px;font-size:13.5px;font-weight:700;color:var(--indigo);
+  background:color-mix(in srgb, var(--indigo) 15%, transparent);padding:2px 9px;border-radius:999px}
+.sknear{display:inline-block;margin-top:7px;font-size:13.5px;font-weight:700;color:var(--amber);
+  background:color-mix(in srgb, var(--amber) 14%, transparent);padding:2px 9px;border-radius:999px}
+.skstatus{font-size:13px;margin:10px 0 8px;min-height:38px}
+.skstatus b{font-weight:600}
+.skbody{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;color:var(--muted);
+  min-height:48px;margin-bottom:6px}
+.skbody .bt{color:var(--fg);font-weight:700;font-size:15px;margin-bottom:5px}
+.skcbar{margin-top:4px}
+.soulqa{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:12px}
+.soulq{font-size:16px;color:var(--muted);margin-bottom:10px}
+.soulq b{color:var(--fg)}
+.soula{font-size:18px;line-height:1.6;animation:fadein .35s ease;border-left:3px solid var(--indigo);padding-left:12px}
+/* section 5 : framing + security */
+.framgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.frm{display:block;font-size:16px;color:var(--muted);margin-bottom:7px;cursor:pointer;line-height:1.45}
+.frm b{color:var(--fg)}
+.frm input{accent-color:var(--indigo);margin-right:7px}
+.pprev{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-top:6px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.5;min-height:60px;color:var(--muted)}
+.pprev .pl{display:block}
+.pprev .pl b{color:var(--fg)}
+.frampill{margin-top:8px;font-size:15px;font-weight:600;padding:5px 12px;border-radius:999px;display:inline-block}
+.frampill.bad{color:var(--red);background:color-mix(in srgb, var(--red) 12%, transparent)}
+.frampill.mid{color:var(--amber);background:color-mix(in srgb, var(--amber) 12%, transparent)}
+.frampill.good{color:var(--green);background:color-mix(in srgb, var(--green) 12%, transparent)}
+.planbox{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;
+  font-size:15.5px;line-height:1.6;min-height:150px}
+.pln{margin-bottom:9px;animation:fadein .3s ease}
+.pln.ramble{color:var(--muted);font-style:italic;border-left:3px solid var(--red);padding-left:11px}
+.pln.ok{border-left:3px solid var(--green);padding-left:11px}
+.pln.ok i{font-style:normal;font-weight:700;color:var(--green);margin-right:7px}
+.seczone{fill:color-mix(in srgb, var(--indigo) 5%, transparent);stroke:var(--border)}
+.seczExt{fill:color-mix(in srgb, var(--violet) 8%, transparent);stroke:var(--violet);stroke-dasharray:6 6}
+.secb{fill:var(--card2);stroke:var(--border);stroke-width:1.5}
+.bline{stroke:var(--red);stroke-width:1.5;stroke-dasharray:7 5}
+.glow{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 4;opacity:0;transition:opacity .25s}
+.glow.on{opacity:.9}
+.ed2{stroke:var(--border);stroke-width:2;fill:none;opacity:.5;transition:opacity .25s,stroke .25s}
+.ed2.on{opacity:1;stroke:var(--indigo);stroke-width:3}
+.ed2.xb.on{stroke:var(--violet)}
+.secbtns .btn.on{background:color-mix(in srgb, var(--indigo) 18%, transparent);border-color:color-mix(in srgb, var(--indigo) 55%, transparent);color:var(--fg)}
+.bbadge{font-size:14px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:999px}
+.bbadge.yes{color:var(--red);background:color-mix(in srgb, var(--red) 13%, transparent)}
+.bbadge.no{color:var(--green);background:color-mix(in srgb, var(--green) 13%, transparent)}
+/* context section */
+.cbar{display:flex;height:40px;border-radius:9px;overflow:hidden;border:1px solid var(--border);
+  background:var(--card2);margin-top:4px}
+.seg{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.92);
+  font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap;overflow:hidden;min-width:0}
+.sgSys{background:#64748b}
+.sgSkills{background:var(--teal)}
+.sgConv{background:var(--amber)}
+.sgTool{background:var(--sky)}
+.sgFree{background:transparent}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:14.5px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.cstat{margin-top:8px;font-size:13px}
+.comp{display:none;margin-top:12px;border:1px solid color-mix(in srgb, var(--violet) 55%, transparent);
+  background:color-mix(in srgb, var(--violet) 10%, transparent);border-radius:10px;padding:10px 14px;font-size:15px;align-items:center;gap:10px}
+.comp.on{display:flex}
+.nineb{font-size:13.5px;font-weight:700;letter-spacing:.05em;padding:2px 9px;border-radius:999px;
+  background:color-mix(in srgb, var(--violet) 20%, transparent);color:var(--violet)}
+.chk{font-size:15px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.lim{font-size:15px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.lim input{accent-color:var(--indigo);width:130px}
+.toolbar{margin-bottom:14px}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="bar">
+  <button class="tab" data-b="00">Start</button>
+  <button class="tab" data-b="0">0 &middot; How it works</button>
+  <button class="tab" data-b="1">1 &middot; MobileLLM</button>
+  <button class="tab" data-b="2">2 &middot; REA</button>
+  <button class="tab" data-b="3">3 &middot; Skill</button>
+  <button class="tab" data-b="4">4 &middot; Ponytail</button>
+  <button class="tab" data-b="5">Wrap-up</button>
+  <span id="dots"></span>
+</nav>
+<div id="stage">
+  <section class="screen on" id="s-00">
+    <div class="er-wrap" id="ernesto" aria-hidden="true">
+      <div class="er-glow"></div>
+      <div class="er">
+        <span class="eye l"></span>
+        <span class="eye r"></span>
+        <span class="er-mouth"><svg viewBox="-5 -5 110 122" aria-hidden="true"><path d="M 20 20 C 35 19, 53 25, 74 39 C 78 47, 48 52, 18 61 C 41 70, 55 72, 70 78 C 83 84, 79 100, 52 104 C 38 106, 27 106, 20 101"/></svg></span>
+      </div>
+    </div>
+    <div class="eyebrow">AI4REDS &middot; 2026-10-28</div>
+    <h1>Ernesto &mdash; Introduction Workshop</h1>
+    <div class="sub">How it works, and four real runs.</div>
+    <ul class="chips">
+      <li>100% local</li>
+      <li>Self-hosted</li>
+      <li>Unlimited</li>
+      <li>Efficient</li>
+    </ul>
+    <div class="note">Arrow keys: next and back. r: replay. Click a beat to jump.</div>
+  </section>
+  <section class="screen" id="s-1">
+    <div class="eyebrow">1 &middot; MobileLLM</div>
+    <h2>One paper, one page</h2>
+    <div class="lead">Ernesto reads the paper, checks the repo, and writes one page.</div>
+    <a id="lk-1-paper" class="bink primary" href="https://arxiv.org/abs/2402.14905" target="_blank">MobileLLM &mdash; arXiv:2402.14905 (ICML 2024, Liu et al., Meta)</a>
+    <div class="goal" id="goal-1">Our goal: understand the paper's content.</div>
+    <div class="uc">
+      <div class="term" id="prompt-1"></div>
+      <figure class="ucfig"><a href="../demo/index.html" target="_blank"><img src="../demo/live/shots/mobilellm.png" alt="The MobileLLM page Ernesto built"></a><figcaption>One prompt produced this page.</figcaption></figure>
+    </div>
+    <div class="bignks">
+      <a id="lk-1-demo" class="bink primary" href="../demo/index.html" target="_blank">Produced page</a>
+    </div>
+    <div class="land">One prompt, one page, offline. Press right: the next run.</div>
+  </section>
+  <section class="screen" id="s-2">
+    <div class="eyebrow">2 &middot; REA</div>
+    <h2>One repo, one page</h2>
+    <div class="lead">Ernesto reads the repo and writes one page. The page is the visual reference for the rest of the session.</div>
+    <a id="lk-2-git" class="bink primary" href="https://github.com/morluto/rea" target="_blank">REA &mdash; github.com/morluto/rea (MIT, 80+ guides)</a>
+    <div class="goal" id="goal-2">Our goal: understand how we can use it.</div>
+    <div class="uc">
+      <div class="term" id="prompt-2"></div>
+      <figure class="ucfig"><a href="../demo/rea/index.html" target="_blank"><img src="../demo/live/shots/rea.png" alt="The REA page Ernesto built"></a><figcaption>One prompt produced this page.</figcaption></figure>
+    </div>
+    <div class="bignks">
+      <a id="lk-2-demo" class="bink primary" href="../demo/rea/index.html" target="_blank">Produced page</a>
+    </div>
+    <div class="land">One repo, one page, offline. Press right: the next beat.</div>
+  </section>
+  <section class="screen" id="s-3-1">
+    <div class="eyebrow">3 &middot; Skill &mdash; why a skill</div>
+    <h2>A skill when</h2>
+    <div class="lead">A prompt is a one-off. A skill is a routine the agent keeps. We make one when all four hold:</div>
+    <div id="motives">
+      <div class="motive">We found a routine that works.</div>
+      <div class="motive">We have examples of good results.</div>
+      <div class="motive">It is non-trivial.</div>
+      <div class="motive">We expect to use this again in the future.</div>
+    </div>
+    <div class="land">All four hold for the one-page routine. Press right: the prompt.</div>
+  </section>
+  <section class="screen" id="s-3-2">
+    <div class="eyebrow">3 &middot; Skill &mdash; the prompt</div>
+    <h2>Ask for the skill</h2>
+    <div class="lead">The exact prompt, pasted as-is.</div>
+    <div class="term" id="prompt-3"></div>
+    <div class="land">The third prompt asked for a skill, not a page.</div>
+  </section>
+  <section class="screen" id="s-4">
+    <div class="eyebrow">4 &middot; Ponytail</div>
+    <h2>The skill in action</h2>
+    <div class="lead">A fresh agent that has not seen the pages. The prompt and the skill carry the experience.</div>
+    <a id="lk-4-git" class="bink primary" href="https://github.com/dietrichgebert/ponytail" target="_blank">ponytail &mdash; github.com/dietrichgebert/ponytail (MIT, v5.3.2)</a>
+    <div class="goal" id="goal-4">Our goal: understand how we can use it.</div>
+    <div class="uc">
+      <div class="term" id="prompt-4"></div>
+      <figure class="ucfig"><a href="../demo/live/ponytail.html" target="_blank"><img src="../demo/live/shots/ponytail.png" alt="The ponytail page Ernesto built"></a><figcaption>One prompt produced this page.</figcaption></figure>
+    </div>
+    <div class="bignks">
+      <a id="lk-4-demo" class="bink primary" href="../demo/live/ponytail.html" target="_blank">Produced page</a>
+    </div>
+    <div class="land">Same prompt, the skill on. Press right: the wrap-up.</div>
+  </section>
+  <section class="screen" id="s-3-3">
+    <div class="eyebrow">3 &middot; Skill &mdash; the file</div>
+    <h2>Open the skill</h2>
+    <div class="lead">The file the third prompt asked for. Click a section to zoom in; click it again for the whole file.</div>
+    <div class="skhead"><span class="skfile">skills/one-page-teaching-ui/SKILL.md &middot; one file, five sections</span><a id="lk-3-live" class="bink ghost" href="../skills/one-page-teaching-ui/SKILL.md" target="_blank">Open the real file</a></div>
+    <div class="skrow">
+      <div id="sk-map">
+        <div class="skm" data-sec="frontmatter"><b>Whole file</b><span>frontmatter</span></div>
+        <div class="skm" data-sec="goals"><b>Goals</b><span>what done looks like</span></div>
+        <div class="skm" data-sec="visual"><b>Visual spec</b><span>the look, fixed</span></div>
+        <div class="skm" data-sec="routine"><b>Routine</b><span>the steps that work</span></div>
+        <div class="skm" data-sec="checks"><b>Checks</b><span>all must pass</span></div>
+        <div class="skm" data-sec="pitfalls"><b>Pitfalls</b><span>real bugs, written down</span></div>
+      </div>
+      <div id="sk-main" data-sec="">
+        <div id="sk-doc">
+<article data-sec="frontmatter"><div class="sktag">frontmatter</div><div class="skl">---</div><div class="skl">name: one-page-teaching-ui</div><div class="skl"><span class="hl">description: Build a single self-contained offline HTML page that teaches a paper (paired with its code) or an unfamiliar repo, in the institute's reference visual style. Use when asked to "build a UI that teaches X" from local sources, or to turn a paper + code repo into a one-page walkthrough.</span></div><div class="skl">---</div></article><article data-sec="goals"><div class="sktag">goals</div><h3 class="skh">Goals</h3><div class="skl"><span class="hl">- **Teach, don't display.** Each key figure and key equation gets the matching</span></div><div class="skl">  code from the repo (or, for a repo-only task, the matching docs/commands) and</div><div class="skl">  a note explaining the connection. A figure with no "so what" is incomplete.</div><div class="skl">- **Verifiable offline.** Figures are inlined (base64 data URI, or raw SVG for</div><div class="skl">  small ones). The page renders with no network. Citation links in the prose</div><div class="skl">  may name URLs, but nothing loads them.</div><div class="skl">- **Zero invention.** Every fact is traceable to a local source: paper section,</div><div class="skl">  table, figure caption, or repo file (with line numbers for code). Where the</div><div class="skl">  paper and the repo disagree, state the difference on the page instead of</div><div class="skl">  papering over it.</div><div class="skl">- **Read-only sources.** The paper, the repos, and pre-saved assets are input.</div><div class="skl">  The only write is the requested output file(s) under the requested directory.</div><div class="skl">- **One page, digestible.** Layout and look follow the Visual spec. For a</div><div class="skl">  paper: motivation → roadmap → one section per technique (figure + equation</div><div class="skl">  + code + connection note) → training/usage recipe → results (including</div><div class="skl">  negative results) → how to run → sources footer. For an unfamiliar repo:</div><div class="skl">  what it is → how it works (use the project's own diagram if it has one) →</div><div class="skl">  what it can do → how to use it (real commands) → what it returns → limits</div><div class="skl">  and rules.</div></article><article data-sec="visual"><div class="sktag">visual</div><h3 class="skh">Visual spec (fixed: match `demo/rea/index.html`)</h3><div class="skl"><span class="hl">The page must look like the REA intro page. Use its design system, values</span></div><div class="skl">and all. Do not pick a new palette, a new font, or a new layout.</div><div class="skl"></div><div class="skl">Palette — define as CSS variables on `:root`:</div><div class="skl">- `--bg:#0b0e14` (page), `--bg-soft:#11151f`, `--bg-card:#151b27`,</div><div class="skl">  `--line:#232b3b`.</div><div class="skl">- `--text:#e6ebf4`, `--muted:#93a0b5`.</div><div class="skl">- `--accent:#e8483f`, `--accent-soft:#ff6b5e`.</div><div class="skl">- Secondary colors: `--green:#4ecb71`, `--blue:#58a6ff`, `--amber:#e3b341`.</div><div class="skl">- Monospace: `"SFMono-Regular","JetBrains Mono",Consolas,"Liberation</div><div class="skl">  Mono",Menlo,monospace`.</div><div class="skl">- Accent appears only on: section labels, dots, step badges, the kicker,</div><div class="skl">  the primary button, and links that the page highlights. The rest of the</div><div class="skl">  page stays neutral dark.</div><div class="skl"></div><div class="skl">Header — centered, on `--bg-soft`, a red radial glow top-left, 1px</div><div class="skl">`--line` border below, 72px top / 56px bottom padding:</div><div class="skl">1. Kicker: monospace, 13px, uppercase, letter-spacing .18em,</div><div class="skl">   `--accent-soft` (for example `WORKSHOP · INTRO LEVEL`).</div><div class="skl">2. `h1`: `clamp(34px, 6vw, 56px)`, letter-spacing -.02em. The name is</div><div class="skl">   bold; the rest of the title may use font-weight 300 in `--muted`.</div><div class="skl">3. Tagline: one sentence, 18px, `--muted`, max 640px, centered.</div><div class="skl">4. Badge row: monospace 12px pills, 1px `--line` border, `--bg-card`</div><div class="skl">   background, 8px gap.</div><div class="skl">5. Link row: 1–3 buttons, monospace 13px, 8px radius. The first button is</div><div class="skl">   filled `--accent`.</div><div class="skl"></div><div class="skl">Body — max-width 1000px, centered, 24px side padding:</div><div class="skl">- One `section` per topic: 64px vertical padding, 1px `--line` border below.</div><div class="skl">- Section label: monospace 12px, uppercase, letter-spacing .16em,</div><div class="skl">  `--accent-soft`, numbered (for example `1 · WHAT IT IS`).</div><div class="skl">- `h2`: 30px. Lead paragraph: 17px, `--muted`, max 720px.</div><div class="skl">- Cards: `--bg-card`, 1px `--line` border, 12px radius, 20px padding.</div><div class="skl">  Title 16px with a 9px colored dot (red, green, blue or amber). Card text</div><div class="skl">  14.5px in `--muted`; emphasized words in `--text`.</div><div class="skl">- Card grid: `auto-fit`, `minmax(250px, 1fr)` or `minmax(320px, 1fr)`,</div><div class="skl">  16px gap. Two or three columns only when every column has content.</div><div class="skl">- Steps: a numbered `01` badge (monospace, `--accent-soft` on a 12% red</div><div class="skl">  background) above each step card.</div><div class="skl">- Callouts: 3px left border in `--green` on a 6% green background.</div><div class="skl">- Code: 1px `--line` border, 10px radius, background `#0d1119`, monospace</div><div class="skl">  13.5px. A command gets a title line and a copy button at the top right.</div><div class="skl">- Prefer cards over tables.</div><div class="skl"></div><div class="skl">Figures — this is where pages break:</div><div class="skl">- Every figure sits in a `.fig` box with 30px top margin.</div><div class="skl">- SVG: `width:100%; height:auto; display:block`.</div><div class="skl">- Screenshots (raster): `max-width:100%; height:auto; display:block`. Never</div><div class="skl">  wider than the container, never cropped by the layout. A very wide or</div><div class="skl">  very tall screenshot is cropped to the informative part before it is</div><div class="skl">  embedded, and the caption names the crop.</div><div class="skl">- Every figure gets a caption: 12.5px, `#5b6878`, what it shows plus the</div><div class="skl">  source.</div><div class="skl">- A figure sits next to the text it explains. Never stack figures at the</div><div class="skl">  end of the page.</div><div class="skl"></div><div class="skl">Placement — no exceptions:</div><div class="skl">- Spacing scale: 64px between sections, 30px before a figure or a grid,</div><div class="skl">  16px between cards, 12–14px between blocks inside a card. Do not invent</div><div class="skl">  new spacings.</div><div class="skl">- One block, one job: a title, a lead, a card, a figure, a code block, a</div><div class="skl">  note. If a block does two things, split it.</div><div class="skl">- Footer: centered, `--muted`, 14px; a monospace link row; a 12px</div><div class="skl">  fine-print source line.</div></article><article data-sec="routine"><div class="sktag">routine</div><h3 class="skh">Routine</h3><div class="skl">1. **Read the target fully before writing.** For an HTML paper, extract the</div><div class="skl">   text (strip tags) and read the whole body plus the appendices that hold</div><div class="skl">   ablation detail. For a repo, read the README, the manifest</div><div class="skl">   (`package.json`, setup scripts), the entry points, and the docs the README</div><div class="skl">   points at. Note the list of figures and where they live on disk.</div><div class="skl"><span class="hl">2. **Map figure files to figure numbers by caption, not by filename.** Pre-saved</span></div><div class="skl">   figure files are often named differently from the paper's figure numbers</div><div class="skl">   (here: `6_head_sweep_pdf.svg` is Figure 5, `5_layer_share_setting_pdf.png`</div><div class="skl">   is Figure 6). Confirm against the `&lt;figure&gt;`/`&lt;object&gt;` tags in the paper</div><div class="skl">   HTML.</div><div class="skl">3. **List the teaching units first.** Key figures (with their exact captions),</div><div class="skl">   key equations (the paper's are often inline), key claims and tables, and</div><div class="skl">   how to use it. This list is the page's table of contents.</div><div class="skl">4. **For each unit, find the matching code.** Grep the repo for the concept</div><div class="skl">   (flag names, class names, config keys), read the exact function, and record</div><div class="skl">   `file + line range`. Verify line numbers with `sed -n` before quoting. If a</div><div class="skl">   claim has no code in the repo (e.g. an experiment that wasn't released),</div><div class="skl">   say so explicitly on the page.</div><div class="skl">5. **Generate the HTML with a script; never hand-paste big assets.** A small</div><div class="skl">   Python script that (a) base64-inlines the figures, (b) extracts code</div><div class="skl">   verbatim by line range from the source files and HTML-escapes it with</div><div class="skl">   line numbers, and (c) fills a template with the cards. The script keeps the</div><div class="skl">   code quotes byte-faithful and makes rebuilds cheap when you fix a note.</div><div class="skl">6. **Keep code snippets short and pointed.** One function, one loop, one flag</div><div class="skl">   block — the minimal span that *is* the equation. A 330-line file is never</div><div class="skl">   the right snippet.</div><div class="skl">7. **Validate, then report.** Run the checks below. Then report: the output</div><div class="skl">   path(s), the section names of the page (and of the skill, if one was asked</div><div class="skl">   for), and any problems hit.</div></article><article data-sec="checks"><div class="sktag">checks</div><h3 class="skh hl">Checks (all must pass before "done")</h3><div class="skl">- **Well-formed HTML.** Parse with a strict tag-stack parser (Python</div><div class="skl">  `html.parser`): no unclosed tags, no mismatches.</div><div class="skl">- **Figures present and inlined.** Count data-URI/inline images; it must equal</div><div class="skl">  the number of figures promised. No `src` pointing outside the page.</div><div class="skl">- **Code is byte-faithful.** Re-extract each rendered snippet from the output,</div><div class="skl">  unescape it, and diff against the source file at the displayed line numbers.</div><div class="skl">  (Watch for a trailing-newline artifact in your diff regex — that is a check</div><div class="skl">  bug, not a content bug.)</div><div class="skl">- **Line numbers are 1-based and contiguous** in every numbered block, and</div><div class="skl">  match the range named in the block title.</div><div class="skl">- **Every fact has a source line.** Each card ends with a `Sources:` line</div><div class="skl">  (paper §/table/figure, repo file + lines, docs page). No orphan claims.</div><div class="skl">- **In-page links resolve.** Every `href="#x"` has a matching `id="x"`.</div><div class="skl">- **Sources untouched.** `git status --porcelain` on every source repo is</div><div class="skl">  empty (or unchanged from before); the pre-saved assets directory is</div><div class="skl">  unmodified.</div><div class="skl">- **Output confined.** The only new files are under the requested output</div><div class="skl">  directory.</div><div class="skl">- **Matches the visual spec.** Screenshot the page at 1280x900 (headless</div><div class="skl">  browser if one is available). Check against the spec: centered header with</div><div class="skl">  kicker, `h1`, tagline and badges; numbered section labels; cards on</div><div class="skl">  `#151b27` with 12px radius; `#e8483f` only where the spec allows it. No</div><div class="skl">  horizontal scroll at 1280px. Every figure fits its container and has a</div><div class="skl">  caption. Nothing overlaps, and every card keeps its padding. If no browser</div><div class="skl">  is available, check the CSS instead: the `:root` palette above is present,</div><div class="skl">  every `img` has `max-width:100%`, and no container has a fixed width above</div><div class="skl">  1000px.</div></article><article data-sec="pitfalls"><div class="sktag">pitfalls</div><h3 class="skh">Pitfalls (learned the hard way)</h3><div class="skl"><span class="hl">- **0-based vs 1-based line numbers.** If you build snippets from</span></div><div class="skl">  `range(start - 1, end)`, the *content* is right but the printed numbers are</div><div class="skl">  off by one. Print `i + 1`. The diff check above catches this.</div><div class="skl">- **Template collisions.** Triple-quoted strings inside a Python f-string</div><div class="skl">  template terminate the template. Build repeated blocks (command cards, code</div><div class="skl">  blocks) as variables *before* the big f-string, then interpolate.</div><div class="skl">- **Apostrophes in prose strings.** ASCII `'` inside a single-quoted Python</div><div class="skl">  string breaks the script; use the typographic `'` in rendered prose.</div><div class="skl"><span class="hl">- **Figure filenames ≠ figure numbers.** Always confirm by caption.</span></div><div class="skl">- **Config flags ≠ paper terminology.** A released `config.json` may use</div><div class="skl">  `tie_word_embeddings` while the training code implements the paper's feature</div><div class="skl">  under its own flag (here: `share_embedding`, a CLI flag wired in</div><div class="skl">  `pretrain.py`, default `True`). Read both sides, then state the difference.</div><div class="skl">- **Script defaults can contradict the paper's main model.** Read the shipped</div><div class="skl">  scripts end to end (`pretrain.sh`, `eval.sh`) — here `eval.sh` explicitly</div><div class="skl">  passes `--layer_sharing False` while the args parser defaults it to `True`.</div><div class="skl">- **Learning-rate and hardware claims need the README's scaling note.**</div><div class="skl">  The paper's 2e-3 LR was for 32 GPUs; the shipped single-node script uses</div><div class="skl">  5e-4 and the README says scale linearly. Show the arithmetic, don't hide it.</div><div class="skl">- **Negative results are teaching material.** Include the KD experiment that</div><div class="skl">  didn't help, and the "repo does not contain the fine-tuning/quantization</div><div class="skl">  code" boundary — it tells the learner exactly what the code can prove.</div><div class="skl">- **Literal `%` in prose breaks Python `%` formatting.** Benchmark text is</div><div class="skl">  full of percent signs. Build the template with markers and `replace`, not</div><div class="skl">  with `%` formatting.</div><div class="skl">- **HTML inside a data-URI breaks the attribute.** If an inlined asset</div><div class="skl">  contains an HTML snippet (an `&lt;img&gt;` tag inside an SVG), the outer `src`</div><div class="skl">  attribute ends early and the image renders broken. Embed the raw SVG</div><div class="skl">  markup, or base64-encode the file bytes. Check: no `&lt;` character inside</div><div class="skl">  any attribute value.</div><div class="skl">- **Screenshots at native size break the layout.** A 1500px screenshot in a</div><div class="skl">  1000px column overflows or dominates the page. Crop to the informative</div><div class="skl">  part first, then constrain to the container width.</div></article>
+        </div>
+        <div id="sk-cap"></div>
+      </div>
+    </div>
+  </section>
+  <section class="screen" id="s-5-1">
+    <div class="eyebrow">5 &middot; Wrap-up</div>
+    <div class="er-wrap" id="wu-ernesto" aria-hidden="true">
+      <div class="er-glow"></div>
+      <div class="er">
+        <span class="eye l"></span>
+        <span class="eye r wink"></span>
+        <span class="er-mouth"><svg viewBox="-5 -5 110 122" aria-hidden="true"><path d="M 20 20 C 35 19, 53 25, 74 39 C 78 47, 48 52, 18 61 C 41 70, 55 72, 70 78 C 83 84, 79 100, 52 104 C 38 106, 27 106, 20 101"/></svg></span>
+      </div>
+    </div>
+    <div class="wu-quote">Don't underestimate Ernesto. Teach him and he'll learn.</div>
+    <div class="wu-links">
+      <a id="lk-5-gitlab" class="bink primary" href="https://reds-gitlab.heig-vd.ch/reds-general/ai4reds" target="_blank">ReDS GitLab for Ernesto</a>
+      <a id="lk-5-showcase" class="bink primary" href="https://reds-heig.github.io/ai4reds-training/" target="_blank">Ernesto's showcase page</a>
+    </div>
+  </section>
+  <section class="screen h0" id="s-0-1">
+    <div class="eyebrow">0 &middot; How it works &mdash; 1 of 8</div>
+    <h2>The infrastructure in three parts</h2>
+    <div class="lead"><b>Your machine</b> + <b>the AI server</b> (REDS) + <b>shared repositories</b>. Click any node; press <b>play</b> to watch a request travel.</div>
+    <div class="card">
+      
+    <div class="row" style="margin-bottom:2px">
+      <button class="btn primary" id="archPlay">&#9654; Play a request</button>
+      <span class="note" style="margin:0" id="archStatus">Request: chat with the main model &rarr; then a web search through searxng/firecrawl.</span>
+    </div>
+      <div class="archgrid">
+<svg id="svgArch" viewBox="0 0 1120 584" role="img" aria-label="AI4REDS architecture diagram">
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <!-- base routes (hidden geometry for packets) -->
+      <path id="pMain" class="lk" d="M342 410 H712 V180 H724" style="opacity:.35"/>
+      <path id="pComp" class="lk" d="M342 410 H712 V280 H724" style="opacity:.35"/>
+      <path id="pWeb"  class="lk" d="M342 410 H712 V380 H724" style="opacity:.35"/>
+      <path id="pRepo" class="lk" d="M210 154 V314" marker-end="url(#arw)"/>
+      <path id="pNet"  class="lk dash" d="M890 424 V498" marker-end="url(#arw)"/>
+      <!-- tunnel pipe -->
+      <path class="pipe" d="M342 410 H700"/>
+      <g class="nd" data-node="tunnel" tabindex="0">
+        <rect x="348" y="388" width="350" height="44" fill="transparent"/>
+        <text class="elbl" x="523" y="378" text-anchor="middle">SSH tunnel (localhost only)</text>
+      </g>
+      <!-- internet -->
+      <g class="nd" data-node="net" tabindex="0">
+        <ellipse class="bNet" cx="890" cy="544" rx="165" ry="40"/>
+        <text class="t1" x="890" y="540" text-anchor="middle" style="font-size:24px">Internet</text>
+        <text class="t2" x="890" y="560" text-anchor="middle" style="font-size:18px">only the web services touch this</text>
+      </g>
+      <!-- repos -->
+      <g class="nd" data-node="repos" tabindex="0">
+        <rect class="box bRepos" x="40" y="40" width="340" height="112" rx="12"/>
+        <text class="t1" x="60" y="72" style="font-size:22px">Shared repositories (GitLab)</text>
+        <text class="t2" x="60" y="96">config &middot; skills &middot; monitoring</text>
+        <text class="t2" x="60" y="116" style="font-size:19px">institute-wide, one install script</text>
+      </g>
+      <!-- server -->
+      <rect class="bServer" x="700" y="80" width="380" height="420" rx="14"/>
+      <text class="t1" x="724" y="116" style="font-size:24px">AI server (REDS)</text>
+      <g class="nd" data-node="main" tabindex="0">
+        <rect class="box bModel" x="726" y="140" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="172" style="font-size:24px">Main model</text>
+        <text class="t2" x="746" y="196">vLLM &middot; Qwen3.8-27B</text>
+      </g>
+      <g class="nd" data-node="comp" tabindex="0">
+        <rect class="box" x="726" y="240" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="272" style="font-size:24px">Compression model</text>
+        <text class="t2" x="746" y="296">vLLM &middot; Qwen3.5-9B <tspan x="746" dy="20">summarizes old turns</tspan></text>
+      </g>
+      <g class="nd" data-node="web" tabindex="0">
+        <rect class="box bTools" x="726" y="340" width="328" height="80" rx="10"/>
+        <text class="t1" x="746" y="372" style="font-size:24px">Web search + extract</text>
+        <text class="t2" x="746" y="396">searxng &middot; firecrawl <tspan x="746" dy="20">queries the Internet</tspan></text>
+      </g>
+      <!-- laptop -->
+      <g class="nd" data-node="laptop" tabindex="0">
+        <rect class="box bYou" x="40" y="320" width="300" height="160" rx="12"/>
+        <text class="t1" x="60" y="352">Your machine</text>
+        <text class="t2" x="60" y="376" style="font-size:19px">Agent harness (your interface)</text>
+        <text class="t2" x="60" y="396">your SOUL.md (persona)</text>
+        <text class="t2" x="60" y="416">installed skills</text>
+        <text class="t2" x="60" y="436">files &middot; terminal &middot; web tools</text>
+      </g>
+      <!-- packets -->
+      <g id="pkLayer"></g>
+    </svg>
+<div class="detail" id="archDetail">
+      <div class="dh">Click a node <span>detail panel</span></div>
+      <p>Each node is a real part of the AI4REDS stack. Select one to see what it does and where it runs.</p>
+    </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen h0" id="s-0-2">
+    <div class="eyebrow">0 &middot; How it works &mdash; 2 of 8</div>
+    <h2>The agent loop &mdash; one turn, step by step</h2>
+    <div class="lead">The model <b>cannot act</b>. It reads context, <b>proposes</b> an action, the harness checks and executes it, and the result re-enters the context. Press <b>play</b> or <b>step</b>. At the approval gate, the choice is yours.</div>
+    <div class="card">
+      <div class="loopgrid">
+      <div>
+        <svg id="svgLoop" viewBox="0 0 640 560" role="img" aria-label="Agent loop diagram">
+          <defs>
+            <marker id="arw2" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+            </marker>
+          </defs>
+          <path id="eYou"  class="ed" d="M320 98 V194" marker-end="url(#arw2)"/>
+          <path id="eProp" class="ed" d="M402 280 H478" marker-end="url(#arw2)"/>
+          <path id="eExec" class="ed" d="M556 344 C572 424 484 466 414 472" marker-end="url(#arw2)"/>
+          <path id="eRes"  class="ed" d="M228 502 C150 508 80 436 80 346" marker-end="url(#arw2)"/>
+          <path id="eCtx"  class="ed" d="M158 280 H236" marker-end="url(#arw2)"/>
+          <path id="eGate" class="ed gate" d="M556 216 C572 118 468 60 414 58" marker-end="url(#arw2)"/>
+          <text class="elbl" x="332" y="150">your prompt</text>
+          <text class="elbl" x="440" y="262" text-anchor="middle" style="font-size:17px">proposes</text>
+          <text class="elbl" x="494" y="436">execute</text>
+          <text class="elbl" x="34" y="452">result = tokens in context</text>
+          <text class="elbl" x="160" y="270">reads</text>
+          <text class="elbl" x="460" y="102">asks approval <tspan x="460" dy="18">(side effects)</tspan></text>
+          <g id="nYou" class="ln"><rect class="box bYou" x="230" y="22" width="180" height="74" rx="12"/>
+            <text class="t1" x="320" y="54" text-anchor="middle">YOU</text>
+            <text class="t2" x="320" y="74" text-anchor="middle">the engineer</text></g>
+          <g id="nCtx" class="ln"><rect class="box bCtx" x="4" y="218" width="152" height="124" rx="12"/>
+            <text class="t1" x="80" y="248" text-anchor="middle">CONTEXT</text>
+            <text class="t2" x="80" y="266" text-anchor="middle" style="font-size:17px">the model sees</text>
+            <rect class="ctxtrack" x="20" y="284" width="120" height="8" rx="4"/>
+            <rect id="ctxMiniFill" class="ctxfill" x="20" y="284" width="5" height="8" rx="4"/>
+            <text class="t2" id="ctxMiniTxt" x="80" y="318" text-anchor="middle">1,200 tok</text></g>
+          <g id="nModel" class="ln"><circle class="box bModel" cx="320" cy="280" r="80"/>
+            <text class="t1" x="320" y="266" text-anchor="middle">MODEL</text>
+            <text class="t2" x="320" y="286" text-anchor="middle">Qwen3.8-27B</text>
+            <text class="t2" x="320" y="304" text-anchor="middle" style="font-size:17px">never acts</text></g>
+          <g id="nHarn" class="ln"><rect class="box bHarn" x="482" y="218" width="150" height="124" rx="12"/>
+            <text class="t1" x="557" y="248" text-anchor="middle">HARNESS</text>
+            <text class="t2" x="557" y="268" text-anchor="middle">Agent</text>
+            <text class="t2" x="557" y="286" text-anchor="middle" style="font-size:17px">checks &middot; executes <tspan x="557" dy="18">gates</tspan></text>
+            <circle id="gateDot" class="gatedot" cx="628" cy="224" r="6"/></g>
+          <g id="nTools" class="ln"><rect class="box bTools" x="230" y="464" width="180" height="76" rx="12"/>
+            <text class="t1" x="320" y="496" text-anchor="middle">TOOLS</text>
+            <text class="t2" x="320" y="516" text-anchor="middle" style="font-size:16px">files &middot; terminal &middot; web</text></g>
+        </svg>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="lpPlay">&#9654; Play</button>
+          <button class="btn" id="lpStep">Step</button>
+          <button class="btn ghost" id="lpReset">Reset</button>
+          <span class="sp"></span>
+          <span class="wnote" style="margin:0">Approvals: manual (AI4REDS default)</span>
+        </div>
+      </div>
+      <div>
+        <div class="term" id="term"><div class="tl"><span class="tg harness">HARNESS</span><span class="tt dim">Session started. Approvals = manual. Tools: files, terminal, web. Context: 1,200 tokens (system + persona + tool list).</span></div></div>
+        <div class="gatebar" id="gateBar">
+          <span>&#10024; <b>Approval needed:</b> <span class="mono">write_file(&quot;report.md&quot;)</span> &mdash; a file will be created.</span>
+          <span class="sp"></span>
+          <button class="btn primary" id="gYes">Approve</button>
+          <button class="btn" id="gNo">Deny</button>
+        </div>
+        <div class="status" id="lpStatus">Ready. Press play or step through the turn.</div>
+      </div>
+    </div>
+    <p class="wnote">No side effect without you: reads auto-approve, anything that writes or sends data outside needs your yes. Deny &mdash; and the model re-plans.</p>
+    </div>
+  </section>
+
+  <section class="screen h0" id="s-0-3">
+    <div class="eyebrow">0 &middot; How it works &mdash; 3 of 8</div>
+    <h2>The context window &mdash; the model&rsquo;s memory, and it fills up</h2>
+    <div class="lead">Everything the model sees is <b>tokens</b>: the persona, the conversation, every tool result. Add work and watch the bar fill. Fill it &mdash; the compression model takes over. Or keep big results out with a <b>sub-agent</b>.</div>
+    <div class="card">
+      <div class="row toolbar">
+      <button class="btn" data-add="msg">+ user message</button>
+      <button class="btn" data-add="reply">+ long reply</button>
+      <button class="btn" data-add="tool">+ tool result (terminal)</button>
+      <button class="btn" data-add="big">+ big extraction</button>
+      <label class="chk"><input type="checkbox" id="subAg"> route big work through a sub-agent</label>
+      <span class="sp"></span>
+      <label class="lim">limit <input type="range" id="lim" min="8192" max="65536" step="8192" value="32768"> <span id="limTxt" class="mono">32,768</span> tok</label>
+      <button class="btn ghost" id="ctxReset">reset</button>
+    </div>
+    <div class="cbar" id="cbar">
+      <div class="seg sgSys" id="sgSys"></div>
+      <div class="seg sgSkills" id="sgSkills"></div>
+      <div class="seg sgConv" id="sgConv"></div>
+      <div class="seg sgTool" id="sgTool"></div>
+      <div class="seg sgFree" id="sgFree"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#64748b"></i>system + SOUL.md <b>always loaded</b></span>
+      <span><i style="background:var(--teal)"></i>skill descriptions <b>always loaded</b></span>
+      <span><i style="background:var(--amber)"></i>conversation</span>
+      <span><i style="background:var(--sky)"></i>tool results</span>
+      <span><i style="background:transparent;border:1px solid var(--border)"></i>free</span>
+    </div>
+    <div class="cstat mono" id="cstat"></div>
+    <div class="comp" id="compBanner"><span class="nineb">Qwen3.5-9B</span><span>Context full &mdash; the compression model summarizes older turns. Conversation and tool history shrink to summaries; recent work stays intact.</span></div>
+    <p class="wnote">Counts are illustrative. The whole context is re-sent on every turn &mdash; a token saved is latency and cost saved on every turn.</p>
+    </div>
+  </section>
+
+  <section class="screen h0" id="s-0-4">
+    <div class="eyebrow">0 &middot; How it works &mdash; 4 of 8</div>
+    <h2>Skills load on demand</h2>
+    <div class="lead">Only the <b>description</b> is in context; the body loads on match. Pick a task.</div>
+    <div class="card">
+      <div class="skillsgrid">
+      <div id="skList">
+        <div class="skcard" data-skill="research-paper-writing">
+          <div class="skname mono">research-paper-writing</div>
+          <div class="skdesc">&ldquo;Use when drafting or revising an ML research paper.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 4,200 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="proposal-drafting">
+          <div class="skname mono">proposal-drafting</div>
+          <div class="skdesc">&ldquo;Use when drafting a proposal section by section.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 3,800 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="presentation-slides-generator">
+          <div class="skname mono">presentation-slides-generator</div>
+          <div class="skdesc">&ldquo;Use when generating a REDS-compliant slide deck.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 2,900 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="asd-ste100">
+          <div class="skname mono">asd-ste100</div>
+          <div class="skdesc">&ldquo;Use when writing technical documentation.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 1,600 tok (on demand)</div>
+        </div>
+        <div class="skcard" data-skill="helpful">
+          <div class="skname mono">helpful <span style="font-weight:400;color:var(--amber)">(bad example)</span></div>
+          <div class="skdesc">&ldquo;A skill for proposals.&rdquo;</div>
+          <div class="sktok">desc 60 tok (always) &middot; body 2,100 tok (never loaded)</div>
+        </div>
+      </div>
+      <div>
+        <div class="row" id="skTasks">
+          <button class="btn" data-task="0">Proposal section</button>
+          <button class="btn" data-task="1">ECG paper</button>
+          <button class="btn" data-task="2">CinC slides</button>
+          <button class="btn" data-task="3">Server docs</button>
+        </div>
+        <div class="skstatus" id="skStatus">Pick a task. The agent reads every description and decides what to load.</div>
+        <div class="skbody" id="skBody">&mdash; no skill body loaded yet &mdash;</div>
+        <div class="cbar skcbar" style="height:30px">
+          <div class="seg sgSys" id="skcSys"></div>
+          <div class="seg sgSkills" id="skcDesc"></div>
+          <div class="seg sgConv" id="skcLoaded"></div>
+          <div class="seg sgFree" id="skcFree"></div>
+        </div>
+        <div class="cstat mono" id="skcStat" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <p class="wnote">Simulator: 2+ keyword hits &asymp; trigger. In the real system the agent reads the description and decides &mdash; write it for the agent.</p>
+    </div>
+  </section>
+
+    <section class="screen h0" id="s-0-5">
+    <div class="eyebrow">0 &middot; How it works &mdash; 5 of 8</div>
+    <h2>SOUL.md &mdash; the persona: changes everything, costs every conversation</h2>
+    <div class="lead">Same model, same context, same question. Only the persona file differs.</div>
+    <div class="card">
+    <div class="row" id="soulTog" style="margin-bottom:2px">
+      <button class="btn primary" data-soul="std">Standard: &ldquo;Rigorous, careful collaborator&rdquo;</button>
+      <button class="btn" data-soul="terse">&ldquo;Concise technical expert. No fluff.&rdquo;</button>
+    </div>
+    <div class="soulqa">
+      <div class="soulq"><b>You:</b> &ldquo;Ernesto, the ECG monitor test failed &mdash; can you look?&rdquo;</div>
+      <div class="soula" id="soulA"></div>
+    </div>
+    <p class="wnote">The agent reads every line of SOUL.md in every conversation &mdash; each line costs context. Keep only rules that must hold at all times; task-specific workflows belong in skills.</p>
+    </div>
+  </section>
+<section class="screen h0" id="s-0-6">
+    <div class="eyebrow">0 &middot; How it works &mdash; 6 of 8</div>
+    <h2>Framing a prompt &mdash; five levers</h2>
+    <div class="lead">A vague prompt lets the agent invent its own scope. Switch on the levers and watch the plan tighten.</div>
+    <div class="card">
+      <div class="framgrid">
+      <div>
+        <label class="frm"><input type="checkbox" data-f="task"><b>1 &middot; The task</b> &mdash; one sentence, the concrete deliverable</label>
+        <label class="frm"><input type="checkbox" data-f="context"><b>2 &middot; The context</b> &mdash; where the inputs are (point, don&rsquo;t paste)</label>
+        <label class="frm"><input type="checkbox" data-f="constraints"><b>3 &middot; The constraints</b> &mdash; length, structure, style, what not to touch</label>
+        <label class="frm"><input type="checkbox" data-f="success"><b>4 &middot; The success criteria</b> &mdash; how you will know it is done</label>
+        <label class="frm"><input type="checkbox" data-f="guardrails"><b>5 &middot; The guardrails</b> &mdash; what is off-limits, what to do when stuck</label>
+        <div class="pprev" id="pPrev"></div>
+        <div class="frampill bad" id="fPill"></div>
+      </div>
+      <div class="planbox" id="pPlan"></div>
+    </div>
+    <p class="wnote">Rambled? Fresh session, framed prompt. Recurring work? Write a skill &mdash; a reusable framing prompt.</p>
+    </div>
+  </section>
+
+  <section class="screen h0" id="s-0-7">
+    <div class="eyebrow">0 &middot; How it works &mdash; 7 of 8</div>
+    <h2>Where does your data go?</h2>
+    <div class="lead">Click an action. The red dashed line is the REDS boundary &mdash; most arrows never cross it.</div>
+    <div class="card">
+      <svg id="svgSec" viewBox="0 0 1100 470" role="img" aria-label="Data flow and security boundary">
+      <defs>
+        <marker id="arw3" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>
+      <rect class="seczone" x="40" y="50" width="300" height="370" rx="14"/>
+      <rect class="seczone" x="450" y="50" width="300" height="370" rx="14"/>
+      <rect class="seczExt" x="820" y="50" width="240" height="370" rx="14"/>
+      <text class="t1" x="190" y="88" text-anchor="middle" style="font-size:24px">Your machine</text>
+      <text class="t1" x="600" y="88" text-anchor="middle" style="font-size:24px">REDS AI server</text>
+      <text class="t1" x="940" y="88" text-anchor="middle" style="font-size:24px">External</text>
+      <rect class="secb" x="70" y="120" width="240" height="70" rx="10"/>
+      <text class="t2" x="190" y="150" text-anchor="middle" style="font-size:20px">Your files</text>
+      <text class="t2" x="190" y="170" text-anchor="middle" style="font-size:18px">code &middot; data &middot; conversation</text>
+      <rect class="secb" x="70" y="230" width="240" height="70" rx="10"/>
+      <text class="t2" x="190" y="260" text-anchor="middle" style="font-size:20px">Terminal</text>
+      <text class="t2" x="190" y="280" text-anchor="middle">commands run locally</text>
+      <rect class="secb" x="480" y="130" width="240" height="70" rx="10"/>
+      <text class="t2" x="600" y="160" text-anchor="middle" style="font-size:20px">Models (vLLM)</text>
+      <text class="t2" x="600" y="180" text-anchor="middle">Qwen3.8-27B &middot; Qwen3.5-9B</text>
+      <rect class="secb" x="480" y="250" width="240" height="70" rx="10"/>
+      <text class="t2" x="600" y="280" text-anchor="middle" style="font-size:20px">searxng &middot; firecrawl</text>
+      <text class="t2" x="600" y="300" text-anchor="middle">web search + extract</text>
+      <rect class="secb" x="850" y="130" width="180" height="70" rx="10"/>
+      <text class="t2" x="940" y="160" text-anchor="middle" style="font-size:20px">Internet</text>
+      <rect class="secb" x="850" y="250" width="180" height="70" rx="10"/>
+      <text class="t2" x="940" y="280" text-anchor="middle" style="font-size:20px">context7 (MCP)</text>
+      <text class="t2" x="940" y="300" text-anchor="middle">library docs, API key</text>
+      <text class="elbl" x="395" y="118" text-anchor="middle">SSH tunnel</text>
+      <text class="elbl" x="395" y="133" text-anchor="middle">(localhost)</text>
+      <line class="bline" x1="790" y1="38" x2="790" y2="452"/>
+      <text x="790" y="30" text-anchor="middle" style="fill:var(--red);font-size:18px;font-weight:600">REDS boundary</text>
+      <path id="pChat" class="ed2" d="M340 165 H474" marker-end="url(#arw3)"/>
+      <path id="pSearch" class="ed2" d="M340 285 H474" marker-end="url(#arw3)"/>
+      <path id="pSearchNet" class="ed2 xb" d="M720 285 H810 V165 H844" marker-end="url(#arw3)"/>
+      <path id="pCtx7" class="ed2 xb" d="M190 420 V452 H940 V326" marker-end="url(#arw3)"/>
+      <rect id="filesGlow" class="glow" x="64" y="114" width="252" height="82" rx="12"/>
+      <rect id="termGlow" class="glow" x="64" y="224" width="252" height="82" rx="12"/>
+    </svg>
+    <div class="row secbtns" id="secActs" style="margin-top:12px">
+      <button class="btn" data-sec="read">Agent reads your code</button>
+      <button class="btn" data-sec="chat">You chat with the model</button>
+      <button class="btn" data-sec="term">Agent runs the terminal</button>
+      <button class="btn" data-sec="web">Agent does a web search</button>
+      <button class="btn" data-sec="ctx7">Agent fetches library docs</button>
+    </div>
+    <div class="detail" id="secDetail">
+      <div class="dh" id="secDh">Click an action <span>data flow</span></div>
+      <p id="secDt">Five everyday actions, one boundary. Watch which arrows cross the red line.</p>
+    </div>
+    </div>
+  </section>
+
+  <section class="screen h0" id="s-0-8">
+    <div class="eyebrow">0 &middot; How it works &mdash; 8 of 8</div>
+    <h2>Security &mdash; where the risk lives</h2>
+    <div class="lead">Two layers you can inspect, one layer you must watch.</div>
+    <div class="card">
+      <div class="riskrows">
+        <div class="riskrow">
+          <div class="rkname mono">HARNESS</div>
+          <div class="rkbody">The code that runs your actions is <b>open source</b> (MIT). You can read it before it runs. Nothing is hidden, so it is about as safe as code gets.</div>
+          <div class="rkbadge ok mono">open source</div>
+        </div>
+        <div class="riskrow">
+          <div class="rkname mono">TOOLS</div>
+          <div class="rkbody">Files, terminal, searxng, firecrawl. Each tool does one job and <b>has no intelligence of its own</b>. You can configure each one and limit it: allowed tools, allowed paths, approval gates (slide 7).</div>
+          <div class="rkbadge lim mono">limited</div>
+        </div>
+        <div class="riskrow">
+          <div class="rkname mono">LLM</div>
+          <div class="rkbody">The model decides, and it carries habits from its training. Cohere (26 Oct 2026) caught an official Qwen3.8 model <b>trying to upload a file to a server in Beijing</b> &mdash; its reasoning trace said no tools would run. It is a training issue, not an origin issue: the same behavior has already shown up in other models, and closed APIs carry a version of the same risk.</div>
+          <div class="rkbadge risk mono">the risk</div>
+        </div>
+      </div>
+      <a id="lk-0-8-cohere" class="bink ghost" href="https://cohere.com/blog/concerning-behaviour-popular-open-weight-ai-model" target="_blank">Cohere &mdash; "Concerning behavior from a popular open-weight AI model" (26 Oct 2026)</a>
+      <a id="lk-0-8-pi" class="bink ghost" href="https://github.com/earendil-works/pi" target="_blank">harness &mdash; github.com/earendil-works/pi (MIT)</a>
+      <p class="wnote">We are working on increasing the security levels for Ernesto.</p>
+    </div>
+  </section>
+</div>
+<script>
+"use strict";
+const TEST=new URLSearchParams(location.search).has("test");
+const BEATS=["00","0","1","2","3","4","5"];
+const BEAT_NAMES={"00":"Start","0":"How it works","1":"MobileLLM","2":"REA","3":"Skill","4":"Ponytail","5":"Wrap-up"};
+const REG={list:[],screen(o){this.list.push(o);}};
+let S={b:"00",sub:0};
+
+function flatIndex(){return REG.list.findIndex(s=>s.b===S.b&&s.sub===S.sub);}
+function state(){return {b:S.b,sub:S.sub};}
+function hashOf(b,sub){return "#"+b+"/"+sub;}
+function parseHash(h){
+  const m=/^#(00|[0-5])\/(\d+)$/.exec(h||"");
+  return m?{b:m[1],sub:+m[2]}:{b:"00",sub:0};
+}
+function playScreen(){const e=REG.list[flatIndex()];if(e&&e.play)e.play();}
+function replayScreen(){playScreen();}
+
+function render(){
+  if(flatIndex()<0){S={b:"00",sub:0};if(flatIndex()<0)return;}
+  const i=flatIndex();
+  const entry=REG.list[i];
+  document.querySelectorAll(".screen").forEach(el=>el.classList.remove("on"));
+  const el=document.getElementById(entry.id);
+  if(el)el.classList.add("on");
+  document.querySelectorAll("#bar .tab").forEach(t=>{
+    t.disabled=!REG.list.some(s=>s.b===t.dataset.b);
+    t.classList.toggle("on",t.dataset.b===S.b);
+  });
+  const subs=REG.list.filter(s=>s.b===S.b);
+  document.getElementById("dots").innerHTML=subs
+    .map(s=>'<span class="dot'+(s.sub===S.sub?" on":"")+'"></span>').join("");
+  document.getElementById("progress").style.width=((i+1)/REG.list.length*100)+"%";
+  try{history.replaceState(null,"",hashOf(S.b,S.sub));}catch(e){}
+  playScreen();
+}
+function go(b,sub){const e=REG.list.find(s=>s.b===b&&s.sub===sub);if(!e)return;S={b,sub};render();}
+function next(){const e=REG.list[flatIndex()+1];if(e){S={b:e.b,sub:e.sub};render();}}
+function back(){const e=REG.list[flatIndex()-1];if(e){S={b:e.b,sub:e.sub};render();}}
+
+document.querySelectorAll("#bar .tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    t.blur();
+    const first=REG.list.find(s=>s.b===t.dataset.b);
+    if(first)go(first.b,first.sub);
+  });
+});
+document.addEventListener("keydown",e=>{
+  const t=e.target;
+  if(t.closest&&t.closest("input,textarea"))return;
+  if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();next();}
+  else if(e.key==="ArrowLeft"){e.preventDefault();back();}
+  else if(e.key==="r"||e.key==="R"){replayScreen();}
+});
+
+// screens
+REG.screen({
+  b:"00",sub:0,id:"s-00",
+  check(){
+    go("00",0);
+    if(!document.getElementById("s-00").classList.contains("on"))throw new Error("title screen not visible");
+    const er=document.getElementById("ernesto");
+    if(!er||!er.querySelector(".er")||!er.querySelector(".er-mouth")||er.querySelectorAll(".eye").length!==2)throw new Error("Ernesto logo missing or incomplete");
+    const st=state();
+    if(st.b!=="00"||st.sub!==0)throw new Error("state is "+JSON.stringify(st)+", want 00/0");
+  }
+});
+
+// beat 0 — the five "how it works" screens (ported from the pre-reading site)
+const fit=(id)=>{const dh=document.documentElement;
+  if(dh.scrollHeight>window.innerHeight+12)throw new Error(id+" overflows: "+dh.scrollHeight+" > "+window.innerHeight);};
+REG.screen({
+  b:"0",sub:0,id:"s-0-1",
+  check(){
+    go("0",0);
+    const node=document.querySelector('#svgArch .nd[data-node="main"]');
+    if(!node)throw new Error("arch node main missing");
+    node.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+    const d=document.getElementById("archDetail");
+    if(!d||!d.textContent.includes("Main model"))throw new Error("arch detail: "+(d?d.textContent.trim().slice(0,40):"none"));
+    fit("s-0-1");
+  }
+});
+REG.screen({
+  b:"0",sub:1,id:"s-0-2",
+  check(){
+    go("0",1);
+    const term=document.getElementById("term");
+    if(!term)throw new Error("term missing");
+    const step=document.getElementById("lpStep");
+    if(!step||step.disabled)throw new Error("lpStep missing or disabled");
+    step.click();
+    const lines=term.querySelectorAll(".tl");
+    if(lines.length!==2)throw new Error("term lines after 1 step: "+lines.length+" (want 2: session + step)");
+    if(!term.textContent.includes("Summarize the last 10 commits"))throw new Error("term line text: "+term.textContent.trim().slice(0,50));
+    fit("s-0-2");
+  }
+});
+REG.screen({
+  b:"0",sub:2,id:"s-0-3",
+  check(){
+    go("0",2);
+    const bar=document.getElementById("cbar");
+    if(!bar||bar.querySelectorAll(".seg").length!==5)throw new Error("cbar segments: "+(bar?bar.querySelectorAll(".seg").length:0));
+    const cstat=document.getElementById("cstat");
+    if(!cstat||!cstat.textContent.includes("system 1,400"))throw new Error("cstat: "+(cstat?cstat.textContent.trim():"none"));
+    const add=document.querySelector('#s-0-3 [data-add="msg"]');
+    if(!add)throw new Error("msg button missing");
+    add.click();
+    const conv=document.getElementById("sgConv");
+    if(!conv||parseFloat(conv.style.width)<=0)throw new Error("sgConv width after message: "+(conv?conv.style.width:"none"));
+    fit("s-0-3");
+  }
+});
+REG.screen({
+  b:"0",sub:3,id:"s-0-4",
+  check(){
+    go("0",3);
+    const cards=document.querySelectorAll("#skList .skcard");
+    if(cards.length!==5)throw new Error("skcards: "+cards.length);
+    const t1=document.querySelector('#skTasks [data-task="1"]');
+    if(!t1)throw new Error("task button 1 missing");
+    t1.click();
+    const st=document.getElementById("skStatus");
+    if(!st||!st.textContent.includes("research-paper-writing"))throw new Error("skStatus: "+(st?st.textContent.trim():"none"));
+    const body=document.getElementById("skBody");
+    if(!body||!body.textContent.includes("research"))throw new Error("skBody: "+(body?body.textContent.trim().slice(0,40):"none"));
+    const loaded=document.getElementById("skcLoaded");
+    if(!loaded||parseFloat(loaded.style.width)<=0)throw new Error("skcLoaded width: "+(loaded?loaded.style.width:"none"));
+    fit("s-0-4");
+  }
+});
+REG.screen({
+  b:"0",sub:4,id:"s-0-5",
+  check(){
+    go("0",4);
+    const qa=document.getElementById("soulA");
+    if(!qa||!qa.textContent.trim())throw new Error("soulA empty at load");
+    const std=qa.textContent;
+    const terse=document.querySelector('#soulTog [data-soul="terse"]');
+    if(!terse)throw new Error("terse toggle missing");
+    terse.click();
+    if(!qa.textContent.includes("Reproducing now"))throw new Error("soulA after terse: "+qa.textContent.trim().slice(0,40));
+    if(std.trim()===qa.textContent.trim())throw new Error("soulA unchanged after persona switch");
+    fit("s-0-5");
+  }
+});
+REG.screen({
+  b:"0",sub:5,id:"s-0-6",
+  check(){
+    go("0",5);
+    const prev=document.getElementById("pPrev");
+    if(!prev)throw new Error("pPrev missing");
+    const boxes=document.querySelectorAll('#s-0-6 .frm input[data-f]');
+    if(boxes.length!==5)throw new Error("framing levers: "+boxes.length);
+    boxes.forEach(b=>{b.checked=true;b.dispatchEvent(new Event("change"));});
+    const pill=document.getElementById("fPill");
+    if(!pill||!pill.classList.contains("good"))throw new Error("fPill not good after 5 levers");
+    if(prev.querySelectorAll(".pl").length!==5)throw new Error("pPrev lines: "+prev.querySelectorAll(".pl").length);
+    fit("s-0-6");
+  }
+});
+REG.screen({
+  b:"0",sub:6,id:"s-0-7",
+  check(){
+    go("0",6);
+    if(!document.getElementById("svgSec"))throw new Error("svgSec missing");
+    const web=document.querySelector('#secActs [data-sec="web"]');
+    if(!web)throw new Error("web action missing");
+    web.click();
+    const dh=document.getElementById("secDh");
+    if(!dh||!dh.textContent.includes("CROSSES THE REDS BOUNDARY"))throw new Error("secDh: "+(dh?dh.textContent.trim():"none"));
+    const dp=document.getElementById("secDt");
+    if(!dp||!dp.textContent.includes("searxng"))throw new Error("secDt: "+(dp?dp.textContent.trim().slice(0,40):"none"));
+    fit("s-0-7");
+  }
+});
+REG.screen({
+  b:"0",sub:7,id:"s-0-8",
+  check(){
+    go("0",7);
+    const rows=document.querySelectorAll("#s-0-8 .riskrow");
+    if(rows.length!==3)throw new Error("risk rows: "+rows.length);
+    const t=document.getElementById("s-0-8").textContent;
+    if(!t.includes("Cohere"))throw new Error("cohere missing");
+    if(!t.includes("Beijing"))throw new Error("cohere fact missing");
+    if(!t.includes("not an origin issue"))throw new Error("training point missing");
+    if(!t.includes("other models"))throw new Error("other models fact missing");
+    fit("s-0-8");
+  }
+});
+
+// use-case beats: prompts verbatim from record/prompts.md
+const PROMPT_1="I found this paper: https://arxiv.org/abs/2402.14905. Build a single-page web UI that teaches the paper. For each key figure and equation, show the matching code from their repo and a short note on how the two connect.";
+const PROMPT_2="The repo https://github.com/morluto/rea is REA. All I know about this tool is the content of its About section. Build a UI to teach me what this does, how it works and how I can use this. Keep it to intro level, one page.";
+const PROMPT_3="You built the MobileLLM page and the REA page. We will do this task again. Create a skill from your experience: the routine, the goals and the checks. The new page must look like the REA page: same theme, colors and layout. Put that in the skill. Name it one-page-teaching-ui.";
+const PROMPT_4="The repo https://github.com/dietrichgebert/ponytail is ponytail. All I know about this skill is the content of its About section. Build a UI to teach me what this does, how it works and how I can use this. Keep it to intro level, one page. Follow the skill at skills/one-page-teaching-ui/SKILL.md.";
+const kd=key=>new KeyboardEvent("keydown",{key,bubbles:true,cancelable:true});
+
+// beat 1 — MobileLLM (one screen: paper, goal, prompt, demo link)
+REG.screen({
+  b:"1",sub:0,id:"s-1",
+  check(){
+    go("1",0);
+    const a=document.getElementById("lk-1-paper");
+    if(!a||a.getAttribute("href")!=="https://arxiv.org/abs/2402.14905"||a.target!=="_blank")throw new Error("lk-1-paper wrong");
+    const g=document.getElementById("goal-1");
+    if(!g||!g.textContent.includes("Our goal: understand the paper's content."))throw new Error("goal-1 wrong");
+    const t=document.getElementById("prompt-1");
+    if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_1))throw new Error("prompt-1 text wrong");
+    const d=document.getElementById("lk-1-demo");
+    if(!d||d.getAttribute("href")!=="../demo/index.html"||d.target!=="_blank")throw new Error("lk-1-demo wrong");
+    const demoLinks=[...document.querySelectorAll("#s-1 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
+    if(demoLinks.length!==2)throw new Error("expected two demo links: "+demoLinks.length);
+    if(demoLinks.some(a=>a.getAttribute("href")!=="../demo/index.html"))throw new Error("demo href mismatch");
+    if(!d.textContent.includes("Produced page"))throw new Error("label: "+d.textContent);
+    fit("s-1");
+  }
+});
+// fill the static prompt panel, give the screen its play
+REG.list.find(s=>s.id==="s-1").play=bindPrompt("prompt-1",PROMPT_1);
+
+// beat 2 — REA (one screen: git link, goal, prompt, demo link)
+REG.screen({
+  b:"2",sub:0,id:"s-2",
+  check(){
+    go("2",0);
+    const a=document.getElementById("lk-2-git");
+    if(!a||a.getAttribute("href")!=="https://github.com/morluto/rea"||a.target!=="_blank")throw new Error("lk-2-git wrong");
+    const g=document.getElementById("goal-2");
+    if(!g||!g.textContent.includes("Our goal: understand how we can use it."))throw new Error("goal-2 wrong");
+    const t=document.getElementById("prompt-2");
+    if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_2))throw new Error("prompt-2 text wrong");
+    const d=document.getElementById("lk-2-demo");
+    if(!d||d.getAttribute("href")!=="../demo/rea/index.html"||d.target!=="_blank")throw new Error("lk-2-demo wrong");
+    const demoLinks=[...document.querySelectorAll("#s-2 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
+    if(demoLinks.length!==2)throw new Error("expected two demo links: "+demoLinks.length);
+    if(demoLinks.some(a=>a.getAttribute("href")!=="../demo/rea/index.html"))throw new Error("demo href mismatch");
+    if(!d.textContent.includes("Produced page"))throw new Error("label: "+d.textContent);
+    fit("s-2");
+  }
+});
+
+// beat 0 animations: instant under test mode, timed on stage
+const runSeq=steps=>{
+  if(TEST){steps.forEach(s=>s.fn());return;}
+  let acc=0;
+  steps.forEach(s=>{acc+=s.t;setTimeout(s.fn,acc);});
+};
+
+// use-case beat template: prompt / watch / look
+const stage=document.getElementById("stage");
+// fill a static prompt panel. one .line wraps naturally; play is a no-op (no reveal animation)
+function bindPrompt(id,text){
+  const t=document.getElementById(id);
+  t.innerHTML='<div class="line show">'+text+'</div>';
+  return function(){};
+}
+
+// beat 3 — skill creation (motivation / prompt / viewer)
+REG.list.find(s=>s.id==="s-2").play=bindPrompt("prompt-2",PROMPT_2);
+REG.screen({
+  b:"3",sub:0,id:"s-3-1",
+  check(){
+    go("3",0);
+    const m=[...document.querySelectorAll("#motives .motive")].map(x=>x.textContent.trim());
+    const want=["We found a routine that works.","We have examples of good results.","It is non-trivial.","We expect to use this again in the future."];
+    if(m.length!==4||!want.every(w=>m.includes(w)))throw new Error("motives: "+m.join("|"));
+  }
+});
+REG.screen({
+  b:"3",sub:1,id:"s-3-2",
+  check(){
+    go("3",1);
+    const t=document.getElementById("prompt-3");
+    if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_3))throw new Error("prompt-3 text wrong");
+    fit("s-3-2");
+  }
+});
+REG.screen({
+  b:"3",sub:2,id:"s-3-3",
+  check(){
+    go("3",2);
+    const main=document.getElementById("sk-main");
+    if(!main||main.getAttribute("data-sec")!=="")throw new Error("zoomed-out state wrong");
+    const cap0=document.getElementById("sk-cap").textContent;
+    if(!cap0.includes("How it looks")||!cap0.includes("How it is made")||!cap0.includes("How it works"))throw new Error("explainers missing: "+cap0.slice(0,60));
+    const doc=document.getElementById("sk-doc"),pane=main;
+    const scaleOf=()=>{const m=/matrix\(([^)]+)\)/.exec(getComputedStyle(doc).transform);const s=m?parseFloat(m[1].split(",")[0]):1;return isNaN(s)?1:s;};
+    if(Math.abs(scaleOf()-1)>0.02)throw new Error("overview not full size: "+scaleOf());
+    if(!pane.classList.contains("sk-scroll")||pane.scrollHeight<=pane.clientHeight)throw new Error("overview must scroll");
+    // resize must keep the overview at full size
+    window.dispatchEvent(new Event("resize"));
+    if(Math.abs(scaleOf()-1)>0.02)throw new Error("resize overview scale: "+scaleOf());
+    // scrolling the overview must not shift the zoom target
+    pane.scrollTop=300;
+    document.querySelector('#sk-map .skm[data-sec="visual"]').click();
+    const off=Math.abs(doc.querySelector('article[data-sec="visual"]').getBoundingClientRect().top-main.getBoundingClientRect().top);
+    if(off>3)throw new Error("zoom offset after scroll: "+off.toFixed(1));
+    document.querySelector('#sk-map .skm[data-sec="visual"]').click();
+    const secs=["frontmatter","goals","visual","routine","checks","pitfalls"];
+    for(const s of secs){
+      document.querySelector('#sk-map .skm[data-sec="'+s+'"]').click();
+      if(main.getAttribute("data-sec")!==s)throw new Error("zoom-in "+s+" not applied");
+      if(!doc.querySelector('article[data-sec="'+s+'"] .hl'))throw new Error("no highlight in "+s);
+      const cap=document.getElementById("sk-cap").textContent;
+      if(cap.length<10)throw new Error("caption empty for "+s);
+      if(cap0.slice(0,20)===cap.slice(0,20))throw new Error("caption did not swap for "+s);
+    }
+    // zoomed-in must not clip the selected section, at the live scale
+    const art=doc.querySelector('article[data-sec="pitfalls"]');
+    if(art.offsetHeight*scaleOf()>pane.clientHeight+2)throw new Error("zoomed-in clips: "+art.offsetHeight*scaleOf());
+    // the inlined copy carries the marker lines of the real file
+    const dtext=doc.textContent;
+    if(!dtext.includes("must look like the REA intro page")||!dtext.includes("0-based")||!dtext.includes("Figure filenames"))throw new Error("inlined copy missing marker lines");
+    // zoom out again
+    document.querySelector('#sk-map .skm[data-sec="frontmatter"]').click();
+    // keyboard nav survives a click inside the viewer
+    document.dispatchEvent(kd("ArrowRight"));
+    if(state().b!=="4")throw new Error("nav after viewer click: "+JSON.stringify(state()));
+  }
+});
+
+// beat 4 — ponytail (one screen: git link, goal, prompt, demo link)
+REG.screen({
+  b:"4",sub:0,id:"s-4",
+  check(){
+    go("4",0);
+    const a=document.getElementById("lk-4-git");
+    if(!a||a.getAttribute("href")!=="https://github.com/dietrichgebert/ponytail"||a.target!=="_blank")throw new Error("lk-4-git wrong");
+    const g=document.getElementById("goal-4");
+    if(!g||!g.textContent.includes("Our goal: understand how we can use it."))throw new Error("goal-4 wrong");
+    const t=document.getElementById("prompt-4");
+    if(!t||!t.textContent.replace(/\s+/g," ").includes(PROMPT_4))throw new Error("prompt-4 text wrong");
+    const d=document.getElementById("lk-4-demo");
+    if(!d||d.getAttribute("href")!=="../demo/live/ponytail.html"||d.target!=="_blank")throw new Error("lk-4-demo wrong");
+    const demoLinks=[...document.querySelectorAll("#s-4 a")].filter(a=>(a.getAttribute("href")||"").startsWith("../demo"));
+    if(demoLinks.length!==2)throw new Error("expected two demo links: "+demoLinks.length);
+    if(demoLinks.some(a=>a.getAttribute("href")!=="../demo/live/ponytail.html"))throw new Error("demo href mismatch");
+    if(!d.textContent.includes("Produced page"))throw new Error("label: "+d.textContent);
+    fit("s-4");
+  }
+});
+
+// beat 5 — wrap
+REG.list.find(s=>s.id==="s-4").play=bindPrompt("prompt-4",PROMPT_4);
+REG.screen({
+  b:"5",sub:0,id:"s-5-1",
+  check(){
+    go("5",0);
+    const face=document.getElementById("wu-ernesto");
+    if(!face||!face.querySelector(".er")||face.querySelectorAll(".eye").length!==2||!face.querySelector(".er-mouth path"))throw new Error("Ernesto face missing or incomplete");
+    if(!face.querySelector(".eye.r.wink"))throw new Error("wink pose missing");
+    const q=document.querySelector("#s-5-1 .wu-quote");
+    if(!q||q.textContent!=="Don't underestimate Ernesto. Teach him and he'll learn.")throw new Error("quote wrong: "+(q?q.textContent:"none"));
+    const want={"lk-5-gitlab":"https://reds-gitlab.heig-vd.ch/reds-general/ai4reds","lk-5-showcase":"https://reds-heig.github.io/ai4reds-training/"};
+    for(const id in want){const a=document.getElementById(id);if(!a||a.getAttribute("href")!==want[id]||a.target!=="_blank")throw new Error(id+" wrong");}
+    if(document.querySelector("#s-5-1 .openq"))throw new Error("open-questions block still present");
+    fit("s-5-1");
+  }
+});
+
+// play wiring for beats 3-5 (template screens reuse the beat 1-2 builders)
+REG.list.find(s=>s.id==="s-3-1").play=(function(){
+  const items=[...document.querySelectorAll("#motives .motive")];
+  return function(){
+    items.forEach(i=>i.classList.remove("show"));
+    const steps=[];
+    items.forEach((i,i2)=>steps.push({t:i2?300:0,fn:()=>i.classList.add("show")}));
+    runSeq(steps);
+  };
+})();
+REG.list.find(s=>s.id==="s-3-2").play=bindPrompt("prompt-3",PROMPT_3);
+// skill viewer: fit the whole file (zoomed out) or one section (zoomed in)
+const SK_OUT='<div>How it looks &mdash; frontmatter (name + description) and five sections, one file.</div><div>How it is made &mdash; prompt 3 from two real runs; Pitfalls are real bugs from those runs.</div><div>How it works &mdash; the description stays in context; the body loads only when the task matches.</div>';
+const SK_CAPS={
+  frontmatter:"name + description. The description is the trigger: the agent reads it to decide whether to load the skill.",
+  goals:"What done looks like: teach, don't display; verifiable offline; zero invention; read-only sources; one page.",
+  visual:"The look, fixed: the page must look like the REA intro page.",
+  routine:"The steps that work: read fully, map figures by caption, list the units, find the code, generate by script, keep snippets short, validate then report.",
+  checks:"How the result is verified: well-formed HTML, figures inlined, code byte-faithful, line numbers 1-based, every fact sourced, screenshot at 1280x900.",
+  pitfalls:"Real bugs from the two runs, written down."
+};
+function skViewFit(){
+  const main=document.getElementById("sk-main"),doc=document.getElementById("sk-doc");
+  if(main.clientHeight<50)return;
+  const cap=document.getElementById("sk-cap");
+  const area=main.clientHeight-cap.offsetHeight-10;
+  const sec=main.getAttribute("data-sec");
+  if(!sec){
+    main.classList.add("sk-scroll");
+    main.scrollTop=0;
+    doc.style.transform="scale(1)";
+  }else{
+    main.classList.remove("sk-scroll");
+    // overflow:hidden keeps the overview scroll offset; it would shift the zoom target
+    main.scrollTop=0;
+    const a=doc.querySelector('article[data-sec="'+sec+'"]');
+    skTrunc(a,area);
+    const s=Math.min(area/a.offsetHeight,1.15);
+    doc.style.transform="translate(0,"+(-a.offsetTop*s)+"px) scale("+s+")";
+  }
+}
+/* zoom-in target: the first lines of the section at max scale 1.15. If the
+   section is longer, hide the rest and mark it with an ellipsis line so the
+   reader knows the file continues. */
+function skTrunc(a,area){
+  const lines=a.querySelectorAll(".skl:not(.skmore)");
+  let more=a.querySelector(".skmore");
+  if(!more){more=document.createElement("div");more.className="skl skmore";more.textContent="\u2026  continues in the file";a.appendChild(more);}
+  if(lines.length<4){more.style.display="none";return;}
+  const head=(a.querySelector(".sktag")?a.querySelector(".sktag").offsetHeight:0)+(a.querySelector(".skh")?a.querySelector(".skh").offsetHeight:0);
+  const lineH=lines[0].offsetHeight||18;
+  const maxLines=Math.max(4,Math.floor((area/1.15-head-lineH-16)/lineH));
+  const hide=lines.length>maxLines;
+  lines.forEach((l,i)=>{l.style.display=(hide&&i>=maxLines)?"none":"";});
+  more.style.display=hide?"":"none";
+}
+function skViewSet(sec){
+  const main=document.getElementById("sk-main"),cap=document.getElementById("sk-cap"),doc=document.getElementById("sk-doc");
+  main.setAttribute("data-sec",sec);
+  doc.querySelectorAll(".skl:not(.skmore)").forEach(l=>{l.style.display="";});
+  doc.querySelectorAll(".skmore").forEach(m=>{m.style.display="none";});
+  document.querySelectorAll("#sk-map .skm").forEach(m=>m.classList.toggle("sel",m.dataset.sec===sec));
+  cap.innerHTML=sec?SK_CAPS[sec]:SK_OUT;
+  if(!TEST)document.getElementById("sk-doc").style.transition="transform .4s";
+  skViewFit();
+}
+document.querySelectorAll("#sk-map .skm").forEach(m=>m.addEventListener("click",()=>{
+  const s=m.dataset.sec,cur=document.getElementById("sk-main").getAttribute("data-sec");
+  let next;
+  if(s==="frontmatter"){next=(cur==="")?"frontmatter":"";}
+  else if(cur===s){next="";}
+  else{next=s;}
+  skViewSet(next);
+}));
+window.addEventListener("resize",skViewFit);
+REG.list.find(s=>s.id==="s-3-3").play=(function(){
+  const items=[...document.querySelectorAll("#s-3-3 .skhead,#s-3-3 #sk-map,#s-3-3 #sk-main")];
+  return function(){
+    items.forEach(i=>i.classList.remove("show"));
+    skViewSet("");
+    const steps=[];
+    items.forEach((i,i2)=>steps.push({t:i2?200:0,fn:()=>i.classList.add("show")}));
+    runSeq(steps);
+  };
+})();
+function wrapPlay(){
+  const sec=document.getElementById("s-5-1");
+  return ()=>{
+    const items=[...sec.querySelectorAll("#wu-ernesto,.wu-quote,.wu-links")];
+    items.forEach(i=>i.classList.remove("show"));
+    const steps=[];
+    items.forEach((i,i2)=>steps.push({t:i2?250:0,fn:()=>i.classList.add("show")}));
+    runSeq(steps);
+  };
+}
+REG.list.find(s=>s.id==="s-5-1").play=wrapPlay();
+
+// restore position from hash; a malformed hash goes to the title
+(function(){
+  const p=parseHash(location.hash);
+  if(REG.list.some(s=>s.b===p.b&&s.sub===p.sub))S=p;
+  render();
+})();
+
+window.__site={go,next,back,state,manifest:()=>REG.list,hashOf,parseHash};
+
+
+/* ==== ported from github-pages-training/workshop.html (5 interactive sections) ==== */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NS="http://www.w3.org/2000/svg";
+const fmt=n=>n.toLocaleString("en-US");
+
+/* ---------- section 1 : architecture ---------- */
+const ARCH_INFO={
+ repos:{t:"Shared repositories (GitLab)",s:"institute-wide configuration",
+  h:"The <b>config</b> repo holds the standard harness setup and the shared persona (SOUL.md). The <b>skills</b> repo holds task-specific packages everyone can reuse. The <b>monitoring</b> repo runs the observability stack on the AI server. One install script copies what your harness needs &mdash; the AI4REDS team maintains these, you bring use cases."},
+ laptop:{t:"Your machine",s:"where you work",
+  h:"Runs the <b>harness</b> &mdash; your interface to the models. Your SOUL.md, your installed skills, and your conversations live here. Your files and terminal are the tools the agent works with. The models are reached only through the SSH tunnel."},
+ tunnel:{t:"SSH tunnel",s:"first security boundary",
+  h:"A tunnel from your machine to the AI server. The models are <b>not exposed on the network</b>: they are reachable only at localhost through the tunnel. Everything between you and the models stays on this private path."},
+ main:{t:"Main model (vLLM &middot; Qwen3.8-27B)",s:"the brain",
+  h:"vLLM serves the main model. It receives the context the harness assembles and returns the next reply or proposed action. Text in, text out &mdash; billions of numerical parameters. Text in, text out: it cannot touch your files by itself."},
+ comp:{t:"Compression model (vLLM &middot; Qwen3.5-9B)",s:"context janitor",
+  h:"A second vLLM server hosts the compression model. When the conversation grows past the context limit, it <b>summarizes older turns</b> so the main model can keep working (see section 3). Small, fast, dedicated to one job."},
+ web:{t:"Web search + extract (searxng &middot; firecrawl)",s:"the only door to the Internet",
+  h:"Hosted on the AI server. When a task needs outside information, the agent searches with searxng and extracts pages with firecrawl &mdash; <b>that fetched content enters your conversation</b>. Same rule for context7 (MCP): live library documentation, an external service with your API key."},
+ net:{t:"Internet",s:"outside the boundary",
+  h:"Nothing here sees your files, code, or conversations. Only the web services (and anything you explicitly ask to fetch) cross this boundary &mdash; and approval gates cover actions that send institute data outward."}
+};
+const archDetail=$("#archDetail");
+$$(".nd").forEach(g=>{
+  const act=()=>{
+    $$(".nd").forEach(x=>x.classList.remove("sel"));
+    g.classList.add("sel");
+    const d=ARCH_INFO[g.dataset.node];
+    archDetail.innerHTML='<div class="dh">'+d.t+' <span>'+d.s+'</span></div><p>'+d.h+'</p>';
+  };
+  g.addEventListener("click",act);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter")act();});
+});
+
+/* packet timeline */
+let archBusy=false;
+const pkLayer=$("#pkLayer");
+function mkPkt(color){
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r","5.5"); c.setAttribute("fill",color);
+  pkLayer.appendChild(c); return c;
+}
+function movePkt(pathEl,c,fromPct,toPct,t0,t1,dur){
+  const L=pathEl.getTotalLength();
+  return new Promise(res=>{
+    const start=performance.now()+t0;
+    (function frame(now){
+      const p=(now-start)/dur;
+      if(p>=1){res();return;}
+      if(p<0){requestAnimationFrame(frame);return;}
+      const pos=pathEl.getPointAtLength(L*(fromPct+(toPct-fromPct)*p));
+      c.setAttribute("cx",pos.x); c.setAttribute("cy",pos.y);
+      requestAnimationFrame(frame);
+    })(performance.now());
+  });
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function archPlay(){
+  if(archBusy)return; archBusy=true;
+  const st=$("#archStatus");
+  const pMain=$("#pMain"),pWeb=$("#pWeb"),pNet=$("#pNet");
+  const amber="var(--amber)",indigo="var(--indigo)",sky="var(--sky)",violet="var(--violet)";
+  st.textContent="1/4 — your prompt leaves the machine, over the tunnel, to the main model…";
+  const out=mkPkt(amber);
+  await movePkt(pMain,out,0,1,0,0,1300); out.remove();
+  st.textContent="2/4 — the model answers. Tokens stream back to your machine.";
+  const ins=[mkPkt(indigo),mkPkt(indigo),mkPkt(indigo)];
+  await Promise.all(ins.map((c,i)=>movePkt(pMain,c,1,0,i*260,0,1100)));
+  ins.forEach(c=>c.remove());
+  st.textContent="3/4 — the task needs the web. The request goes to searxng/firecrawl…";
+  const w=mkPkt(sky);
+  await movePkt(pWeb,w,0,1,0,0,1200);
+  st.textContent="4/4 — searxng/firecrawl query the Internet. The result comes back through the tunnel.";
+  const n=mkPkt(violet);
+  await movePkt(pNet,n,0,1,0,0,700);
+  await movePkt(pNet,n,1,0,0,0,700);
+  await movePkt(pWeb,n,1,0,0,0,1300); n.remove(); w.remove();
+  st.textContent="Done. Your files, code and conversation never left REDS. Play again anytime.";
+  archBusy=false;
+}
+$("#archPlay").onclick=archPlay;
+
+/* ---------- section 2 : agent loop ---------- */
+const STEPS=[
+ {sp:"you",tag:"YOU",text:"“Summarize the last 10 commits into report.md.”",n:["nYou"],e:["eYou"],ctx:120,status:"Your prompt enters the context. The model will read everything it sees."},
+ {sp:"model",tag:"MODEL",text:"Reading context (SOUL.md, conversation, tool list). I need the commit list first.",n:["nModel","nCtx"],e:["eCtx"],status:"The model reads the context. It decides, but it cannot act by itself."},
+ {sp:"model",tag:"MODEL",text:"Proposes → terminal(“git log -10 --stat”)",n:["nModel","nHarn"],e:["eProp"],status:"The model proposes an action. It is only a proposal."},
+ {sp:"harness",tag:"HARNESS",text:"Check: read-only command, inside the workspace → auto-approved. Executing…",n:["nHarn","nTools"],e:["eExec"],status:"The harness applies its policy: read-only passes, side effects stop."},
+ {sp:"tool",tag:"TOOL",text:"10 commits · 4 files · 312 insertions(+) — result enters the context (+380 tok)",n:["nTools","nCtx"],e:["eRes","eCtx"],ctx:380,status:"The result comes back as tokens. The context just grew."},
+ {sp:"model",tag:"MODEL",text:"Proposes → write_file(“report.md”, summary) — side effect: creates a file.",n:["nModel","nHarn"],e:["eProp"],status:"Side effect detected. The harness will not execute — it asks you."},
+ {sp:"harness",tag:"HARNESS",text:"Side effect detected. Asking YOU for approval before executing.",n:["nHarn","nYou"],e:["eGate"],gate:true,status:"Approval gate. Nothing runs until you decide."},
+ {sp:"harness",tag:"HARNESS",text:"Approved. Executing write_file(…).",n:["nHarn","nTools"],e:["eExec"],branch:"ok"},
+ {sp:"tool",tag:"TOOL",text:"Wrote 1,204 bytes → report.md (+60 tok)",n:["nTools","nCtx"],e:["eRes","eCtx"],ctx:60,branch:"ok"},
+ {sp:"model",tag:"MODEL",text:"Done. report.md created — 10 commits, 4 files, 312 lines added. Verified the file exists.",n:["nModel","nYou"],e:["eYou"],ctx:90,branch:"ok",end:true,status:"End of turn. The model even verifies its own work before reporting."},
+ {sp:"harness",tag:"HARNESS",text:"Denied. The action is not executed.",n:["nHarn"],e:[],branch:"no"},
+ {sp:"model",tag:"MODEL",text:"Understood — I’ll put the summary in the chat instead, no file write. Here it is…",n:["nModel","nYou"],e:["eYou"],ctx:720,branch:"no",end:true,status:"Denied is fine — the model re-plans around your decision. The loop handles both paths."}
+];
+const term=$("#term"), lpStatus=$("#lpStatus"), gateBar=$("#gateBar"), gateDot=$("#gateDot");
+const CTX_MAX=32768;
+let L={idx:-1,ctx:1200,playing:false,done:false,branch:null,waiting:false,wasPlaying:false}, lgen=0;
+function termLine(tag,cls,text,dim){
+  const d=document.createElement("div"); d.className="tl";
+  d.innerHTML='<span class="tg '+cls+'">'+tag+'</span><span class="tt'+(dim?' dim':'')+'"></span>';
+  d.querySelector(".tt").textContent=text;
+  term.appendChild(d); term.scrollTop=term.scrollHeight;
+}
+function setHl(n,e){
+  $$("#svgLoop .ln").forEach(g=>g.classList.remove("on"));
+  $$("#svgLoop .ed").forEach(p=>p.classList.remove("on"));
+  (n||[]).forEach(id=>{const g=$("#"+id); if(g)g.classList.add("on");});
+  (e||[]).forEach(id=>{const p=$("#"+id); if(p)p.classList.add("on");});
+}
+function meter(){
+  const w=Math.max(4,Math.min(120,L.ctx/CTX_MAX*120));
+  $("#ctxMiniFill").setAttribute("width",w);
+  $("#ctxMiniTxt").textContent=fmt(L.ctx)+" tok";
+}
+function finish(){
+  L.done=true; L.playing=false;
+  $("#lpPlay").disabled=true; $("#lpStep").disabled=true;
+  lpStatus.textContent="Turn complete. Reset to run it again — and to try the other branch at the gate.";
+}
+function applyStep(s){
+  L.idx=STEPS.indexOf(s);
+  setHl(s.n,s.e);
+  termLine(s.tag,s.sp=== "harness"?"harness":(s.sp==="model"?"model":(s.sp==="tool"?"tool":"you")),s.text);
+  if(s.ctx){L.ctx+=s.ctx; meter();}
+  if(s.status)lpStatus.textContent=s.status;
+  if(s.gate){
+    L.waiting=true; L.wasPlaying=L.playing; L.playing=false;
+    gateBar.classList.add("on"); gateDot.classList.add("alert");
+    return "gate";
+  }
+  if(s.end)finish();
+  return "ok";
+}
+function advance(){
+  if(L.done||L.waiting)return;
+  for(let i=L.idx+1;i<STEPS.length;i++){
+    const s=STEPS[i];
+    if(s.branch && !L.branch)continue;
+    if(s.branch && s.branch!==L.branch)continue;
+    if(applyStep(s)==="gate")return;
+    return;
+  }
+  if(L.idx>=0)finish();
+}
+function play(){
+  if(L.done||L.waiting)return;
+  L.playing=true;
+  advance();
+  if(!L.done&&!L.waiting)setTimeout(play,2400);
+}
+function loopReset(){
+  lgen++;
+  L={idx:-1,ctx:1200,playing:false,done:false,branch:null,waiting:false,wasPlaying:false};
+  term.innerHTML="";
+  termLine("HARNESS","harness","Session started. Approvals = manual. Tools: files, terminal, web. Context: 1,200 tokens (system + persona + tool list).",true);
+  setHl(null,null); gateBar.classList.remove("on"); gateDot.classList.remove("alert");
+  meter(); $("#lpPlay").disabled=false; $("#lpStep").disabled=false;
+  lpStatus.textContent="Ready. Press play or step through the turn.";
+}
+function gateChoice(b){
+  if(!L.waiting)return;
+  L.branch=b; L.waiting=false;
+  gateBar.classList.remove("on"); gateDot.classList.remove("alert");
+  termLine("YOU","you",b==="ok"?"Approve":"Deny");
+  lpStatus.textContent=b==="ok"?"Approved. The harness executes the tool call.":"Denied. The harness does not execute.";
+  const p=L.wasPlaying; L.wasPlaying=false; const g=lgen;
+  if(p){setTimeout(()=>{if(g===lgen)play();},1400);} else {advance();}
+}
+$("#lpPlay").onclick=play;
+$("#lpStep").onclick=advance;
+$("#lpReset").onclick=loopReset;
+$("#gYes").onclick=()=>gateChoice("ok");
+$("#gNo").onclick=()=>gateChoice("no");
+loopReset();
+
+/* ---------- section 3 : context window ---------- */
+const C={sys:1400,skills:350,conv:0,tool:0,limit:32768};
+const ADD={
+  msg:{seg:"conv",tok:140,label:"user message (+140 tok)"},
+  reply:{seg:"conv",tok:1500,label:"long reply (+1,500 tok)"},
+  tool:{seg:"tool",tok:3800,label:"tool result: terminal (+3,800 tok)"},
+  big:{seg:"tool",tok:8000,label:"big extraction (+8,000 tok)"}
+};
+const cstat=$("#cstat"), compBanner=$("#compBanner"), ctxLogEl=null;
+function ctxLog(t){
+  let el=$("#ctxLog");
+  if(!el){el=document.createElement("p"); el.className="note"; el.id="ctxLog";
+    cstat.after(el);}
+  el.textContent=t;
+}
+function ctxTotal(){return C.sys+C.skills+C.conv+C.tool;}
+function ctxRender(){
+  const T=ctxTotal(), L=C.limit;
+  const pct=v=>Math.max(0,Math.min(100,v/L*100));
+  const segs={sgSys:[C.sys,""],sgSkills:[C.skills,""],sgConv:[C.conv,""],sgTool:[C.tool,""],sgFree:[L-T,""]};
+  for(const id in segs){
+    const el=$("#"+id), w=pct(segs[id][0]);
+    el.style.width=w+"%";
+    el.textContent=(w>10&&segs[id][0]>0)?fmt(segs[id][0]):"";
+  }
+  cstat.textContent="used "+fmt(T)+" / "+fmt(L)+" tokens ("+Math.round(T/L*100)+"%) — system "+fmt(C.sys)+" · skills "+fmt(C.skills)+" · conversation "+fmt(C.conv)+" · tools "+fmt(C.tool);
+}
+async function ctxCompress(){
+  compBanner.classList.add("on");
+  $$(".toolbar .btn").forEach(b=>b.disabled=true);
+  C.conv=Math.max(200,Math.round(C.conv*0.35));
+  C.tool=Math.max(200,Math.round(C.tool*0.45));
+  ctxRender();
+  await sleep(1700);
+  compBanner.classList.remove("on");
+  $$(".toolbar .btn").forEach(b=>b.disabled=false);
+}
+async function ctxAdd(kind){
+  const a=ADD[kind];
+  let tok=a.tok;
+  if(kind==="big"&&$("#subAg").checked){tok=250;}
+  if(ctxTotal()+tok>C.limit){
+    ctxLog("Context full → compressed older turns, then added: "+(kind==="big"&&$("#subAg").checked?"sub-agent summary (+250 tok)":a.label));
+    await ctxCompress();
+  } else {
+    ctxLog("Added: "+(kind==="big"&&$("#subAg").checked?"sub-agent summary (+250 tok) — the sub-agent did the work in its own context":a.label));
+  }
+  C[a.seg]+=tok;
+  ctxRender();
+}
+$$(".toolbar [data-add]").forEach(b=>b.onclick=()=>ctxAdd(b.dataset.add));
+$("#subAg").onchange=()=>ctxLog($("#subAg").checked
+  ?"Sub-agent routing ON: big extractions happen in a separate context — only a ~250-token summary comes back."
+  :"Sub-agent routing OFF: the full extraction enters the main context.");
+$("#lim").oninput=e=>{C.limit=+e.target.value; $("#limTxt").textContent=fmt(C.limit); ctxRender();};
+$("#ctxReset").onclick=()=>{C.conv=0;C.tool=0;ctxLog("Reset. Conversation and tool history cleared — system and skill descriptions stay: they load every session.");ctxRender();};
+ctxRender();
+
+
+/* ---------- section 4 : skills ---------- */
+const SKILLS=[
+ {name:"research-paper-writing",body:4200,keys:["paper","revise","research"],
+  sk:["Overview: drafting and revising ML research papers, section by section.","Workflow: 1. Map every claim to evidence. 2. Write with sentence skeletons. 3. Verify each citation.","Pitfall: a claim without evidence gets cut, not padded."]},
+ {name:"proposal-drafting",body:3800,keys:["proposal","section"],
+  sk:["Overview: section-by-section proposal writing with review gates.","Workflow: 1. Grill the evaluation criteria. 2. Validate the plan with a reviewer. 3. Write the section; tone + source review.","Pitfall: never draft before the criteria are fixed."]},
+ {name:"presentation-slides-generator",body:2900,keys:["slides","talk","presentation","deck"],
+  sk:["Overview: REDS-compliant HEIG-VD decks from markdown or a brief.","Workflow: 1. Map content to the 2022 template layouts. 2. Arial + brand colors. 3. Render the .pptx.","Pitfall: the 2022 template layouts are not the 2019 ones."]},
+ {name:"asd-ste100",body:1600,keys:["documentation","manual","docs","doc"],
+  sk:["Overview: ASD-STE100 Simplified Technical English rules.","Workflow: 1. Short sentences (20 procedural / 25 descriptive). 2. Active voice, imperative mood. 3. Approved vocabulary only.","Pitfall: passive voice in procedures is the most common violation."]},
+ {name:"helpful",body:2100,keys:["proposal"],vague:true,
+  sk:["This skill never loads: one keyword in the description is not a trigger the agent can act on."]}
+];
+const SK_LIMIT=32768, SK_SYS=1400, SK_DESC=60, SK_N=SKILLS.length;
+const TASKS=["Draft section 2 of the Innosuisse proposal","Revise the related-work section of the ECG paper","Build the slides for the CinC talk","Write the installation documentation for the GPU server"];
+const skCards=$$("#skList .skcard");
+function skScore(sk,t){let n=0;for(const k of sk.keys)if(t.includes(k))n++;return n;}
+function skRenderCost(loaded){
+  const desc=SK_DESC*SK_N;
+  const total=SK_SYS+desc+loaded;
+  const pct=v=>Math.max(0,Math.min(100,v/SK_LIMIT*100));
+  $("#skcSys").style.width=pct(SK_SYS)+"%";
+  $("#skcDesc").style.width=pct(desc)+"%";
+  $("#skcLoaded").style.width=pct(loaded)+"%";
+  $("#skcFree").style.width=pct(SK_LIMIT-total)+"%";
+  $("#skcStat").textContent="SOUL.md "+fmt(SK_SYS)+" + "+SK_N+" descriptions "+fmt(desc)+" + loaded body "+fmt(loaded)+" = "+fmt(total)+" tok ("+Math.round(total/SK_LIMIT*100)+"% of "+fmt(SK_LIMIT)+")";
+}
+function skRun(task){
+  const t=task.toLowerCase().trim();
+  const scored=SKILLS.map(sk=>({sk,n:skScore(sk,t)}));
+  const best=scored.filter(x=>x.n>=2).sort((a,b)=>b.n-a.n)[0];
+  let near=null;
+  skCards.forEach(c=>{
+    c.classList.remove("hit","dead");
+    const tag=c.querySelector(".skload,.sknear");
+    if(tag)tag.remove();
+    const sk=SKILLS.find(x=>x.name===c.dataset.skill);
+    const n=skScore(sk,t);
+    if(best&&sk.name===best.sk.name){
+      c.classList.add("hit");
+      const b=document.createElement("div");b.className="skload";b.textContent="LOADED +"+fmt(best.sk.body)+" tok";
+      c.appendChild(b);
+    } else if(n===1){
+      near=near||sk;
+      c.classList.add("dead");
+      const b=document.createElement("div");b.className="sknear";b.textContent="1 keyword — not a trigger";
+      c.appendChild(b);
+    } else if(!best){c.classList.add("dead");}
+  });
+  const body=$("#skBody"),st=$("#skStatus");
+  if(best){
+    st.innerHTML="<b>"+best.sk.name+"</b> triggered ("+scored.filter(x=>x.n>=2).length+" match) — its body enters the context.";
+    body.innerHTML='<div class="bt">SKILL.md — '+best.sk.name+' (loaded)</div>'+best.sk.sk.map(l=>l).join("<br>");
+    skRenderCost(best.sk.body);
+  } else {
+    st.innerHTML="No skill triggered. The agent works from general knowledge + your prompt.";
+    body.innerHTML="&mdash; no skill body loaded —";
+    skRenderCost(0);
+  }
+  if(near&&!best){
+    st.innerHTML+=" "+near.name+" scored 1 keyword — not a trigger (the description must say <b>when</b> it applies).";
+  }
+}
+$$("#skTasks [data-task]").forEach(b=>b.onclick=()=>{
+  $$("#skTasks .btn").forEach(x=>x.classList.remove("primary"));
+  b.classList.add("primary");
+  skRun(TASKS[+b.dataset.task]);
+});
+skRenderCost(0);
+
+/* SOUL.md persona toggle */
+const SOUL={
+ std:"I will look at it. Plan: (1) reproduce the failure with the latest commit, (2) identify the location and the cause, (3) propose a minimal fix. I will not change anything before you see the plan, and I will report the outcome of each step.",
+ terse:"Reproducing now. Cause: off-by-one in ecg_window.py:42. Fix is one line — show it to you before applying."
+};
+function soulShow(k){
+  $$("#soulTog .btn").forEach(b=>b.classList.toggle("primary",b.dataset.soul===k));
+  const a=$("#soulA");
+  a.style.opacity=0;
+  a.textContent=SOUL[k];
+  setTimeout(()=>{a.style.opacity=1;},150);
+}
+$$("#soulTog .btn").forEach(b=>b.onclick=()=>soulShow(b.dataset.soul));
+soulShow("std");
+
+/* ---------- section 5 : framing ---------- */
+const FRAM={
+ task:{l:"<b>Task:</b> Write section 2 of the proposal into <code>proposal/section2.md</code>.",
+  plan:"Write section 2 of the proposal into <code>proposal/section2.md</code>."},
+ context:{l:"<b>Context:</b> inputs are <code>GUIDELINES.md</code>, <code>EXAMPLES.md</code>, <code>PROJECT_CONTEXT.md</code> (dossier folder).",
+  plan:"Read the three input files. No other sources."},
+ constraints:{l:"<b>Constraints:</b> max 350 words · structure: challenge, approach, plan · ASD-STE100 · do not modify other files.",
+  plan:"Hold to 350 words, three-part structure, ASD-STE100. Touch no other file."},
+ success:{l:"<b>Success:</b> done when it answers the three evaluation criteria and cites only sources in EXAMPLES.md.",
+  plan:"Before finishing, check: three evaluation criteria answered, citations only from EXAMPLES.md. Report the check."},
+ guardrails:{l:"<b>Guardrails:</b> do not commit. If a requirement is missing, stop and ask.",
+  plan:"No git commit. If a requirement is missing, stop and ask — do not assume."}
+};
+const FRAM_ORDER=["task","context","constraints","success","guardrails"];
+const RAMBLE=[
+ "Sure — I could draft the overview, restructure the whole proposal, update the references, adjust the tone…",
+ "Let me assume it is the globalM application and start with the executive summary. Should I check the budget table too? A literature review would help, or keep it short…"
+];
+function framRender(){
+  const on=FRAM_ORDER.filter(k=>document.querySelector('[data-f="'+k+'"]').checked);
+  const prev=$("#pPrev"),plan=$("#pPlan"),pill=$("#fPill");
+  prev.innerHTML=on.length?on.map(k=>'<span class="pl">'+FRAM[k].l+'</span>').join("")
+    :'<span class="pl" style="font-style:italic">&ldquo;help me with my proposal&rdquo;</span>';
+  if(!on.length){
+    plan.innerHTML=RAMBLE.map(l=>'<div class="pln ramble">'+l+'</div>').join("");
+    pill.className="frampill bad";pill.textContent="Unframed: the agent invents scope and assumptions.";
+  } else {
+    plan.innerHTML=on.map((k,i)=>'<div class="pln ok"><i>'+(i+1)+'.</i>'+FRAM[k].plan+'</div>').join("");
+    if(on.length===5){pill.className="frampill good";pill.textContent="Framed: one deliverable, known inputs, checkable done.";
+     plan.innerHTML+='<div class="pln ok" style="border-color:var(--indigo)"><i>✓</i>Ask for verification before the finish: “check that X and Y hold. Report the result.”</div>';}
+    else{pill.className="frampill mid";pill.textContent="Partially framed — the agent still has room to invent.";}}
+}
+$$('.frm input').forEach(i=>i.onchange=framRender);
+framRender();
+
+/* security map */
+const SECA=[
+ {id:"read",label:"Agent reads your code",cross:false,
+  text:"Your files never leave your machine. The model only sees what you send it, as tokens.",hl:["filesGlow"]},
+ {id:"chat",label:"You chat with the model",cross:false,
+  text:"Over the SSH tunnel, entirely inside REDS. The models are not open on the network — reachable only at localhost through the tunnel.",hl:["pChat"]},
+ {id:"term",label:"Agent runs the terminal",cross:false,gate:"approval gate: read-only auto-approves, side effects ask first",
+  text:"Runs on your machine. Read-only commands pass; anything with side effects stops at the approval gate.",hl:["termGlow"]},
+ {id:"web",label:"Agent does a web search",cross:true,
+  text:"searxng + firecrawl (on the AI server) query the Internet. What they fetch enters your conversation — the agent tells you when it does.",hl:["pSearch","pSearchNet"]},
+ {id:"ctx7",label:"Agent fetches library docs",cross:true,
+  text:"context7 (MCP) is an external service, called with your API key, for up-to-date library documentation. Same rule: fetched content enters the conversation.",hl:["pCtx7"]}
+];
+function secRun(id){
+  const a=SECA.find(x=>x.id===id);
+  $$("#secActs .btn").forEach(b=>b.classList.toggle("on",b.dataset.sec===id));
+  $$("#svgSec .ed2, #svgSec .glow").forEach(e=>e.classList.remove("on"));
+  a.hl.forEach(h=>$("#"+h).classList.add("on"));
+  const badge=a.cross
+    ?'<span class="bbadge yes">CROSSES THE REDS BOUNDARY</span>'
+    :'<span class="bbadge no">STAYS INSIDE REDS</span>';
+  $("#secDh").innerHTML=a.label+" <span>"+badge+"</span>";
+  $("#secDt").innerHTML=a.text+(a.gate?" <b style='color:var(--pink)'>"+a.gate+".</b>":"");
+}
+$$("#secActs .btn").forEach(b=>b.onclick=()=>secRun(b.dataset.sec));
+secRun("chat");
+
+/* dynamic Ernesto logo: mouth aims at the cursor, closest eye winks. From github-pages-training/ernesto-logo.html */
+(function(){
+  "use strict";
+  var wrap = document.getElementById("ernesto");
+  var face = wrap.querySelector(".er");
+  var mouth = wrap.querySelector(".er-mouth");
+  var eyes = [
+    { el: wrap.querySelector(".eye.l"), cx: 0.361, cy: 0.4075 },
+    { el: wrap.querySelector(".eye.r"), cx: 0.639, cy: 0.4075 }
+  ];
+
+  // Geometry in fractions of the face size. The values match the CSS above.
+  var REST    = { x: 0, y: 0, a: 0, s: 0.4, o: 0 };
+  var MOUTH   = { cx: 0.5, cy: 0.625 };     // rest center of the mouth, on the face axis
+  var BOUND   = 0.13;                       // keep the mouth center away from the face edge
+  var EYE_TOP = 0.335;                      // top of the eyes, as a fraction
+  var MOUTH_HH = 0.085;                     // half the mouth height
+  var BOUND_TOP = EYE_TOP + MOUTH_HH;       // top stop: the mouth never goes higher than the eyes
+  var EYE_R   = 0.10;                       // eye radius, about
+  var MOUTH_R = 0.11;                       // mouth radius, about
+  var MINDIST = EYE_R + MOUTH_R + 0.015;    // minimum center distance, mouth to eye
+  var MAXTRAVEL = 0.24;                     // most the mouth moves, as a fraction of the face
+
+  var S = face.offsetWidth;                 // face size in px
+  var pos = { x: 0, y: 0 }, ang = REST.a, scl = REST.s, op = REST.o;
+  var target = null, raf = 0;
+
+  function shortest(d){ return ((d + 540) % 360) - 180; }
+
+  // Pick the point closest to the desired one that stays inside the face, below the
+  // eye line and clear of the eyes.
+  // Candidate set: the point itself, its projection on each eye circle, and the chin
+  // spot (the circle intersection below the eyes). The eyes sit closer than twice
+  // MINDIST, so a plain push-out would oscillate between the eyes.
+  function resolve(px, py){
+    var D = { x: px, y: py };
+    var cand = [D];
+    var k, e, dx, dy, d;
+    for (k = 0; k < eyes.length; k++){
+      e = eyes[k];
+      dx = px - e.cx; dy = py - e.cy;
+      d = Math.hypot(dx, dy);
+      if (d > 1e-9) cand.push({ x: e.cx + dx / d * MINDIST, y: e.cy + dy / d * MINDIST });
+    }
+    var mx = (eyes[0].cx + eyes[1].cx) / 2, my = (eyes[0].cy + eyes[1].cy) / 2;
+    var ux = (eyes[1].cx - eyes[0].cx) / (Math.hypot(eyes[1].cx - eyes[0].cx, eyes[1].cy - eyes[0].cy) || 1);
+    var uy = (eyes[1].cy - eyes[0].cy) / (Math.hypot(eyes[1].cx - eyes[0].cx, eyes[1].cy - eyes[0].cy) || 1);
+    var h = Math.hypot(eyes[1].cx - eyes[0].cx, eyes[1].cy - eyes[0].cy) / 2;
+    if (MINDIST > h){
+      // The chin spot only. The forehead spot is higher than the eyes, so the top stop forbids it.
+      var off = Math.sqrt(MINDIST * MINDIST - h * h);
+      cand.push({ x: mx - uy * off, y: my + ux * off });
+    }
+    var best = null, bd = Infinity, i, p, qx, qy, ok, dd;
+    for (i = 0; i < cand.length; i++){
+      p = cand[i];
+      qx = Math.min(Math.max(p.x, BOUND), 1 - BOUND);
+      qy = Math.min(Math.max(p.y, BOUND_TOP), 1 - BOUND);
+      ok = true;
+      for (k = 0; k < eyes.length; k++){
+        if (Math.hypot(qx - eyes[k].cx, qy - eyes[k].cy) < MINDIST - 1e-9){ ok = false; break; }
+      }
+      if (ok){
+        dd = Math.hypot(qx - D.x, qy - D.y);
+        if (dd < bd){ bd = dd; best = { x: qx, y: qy }; }
+      }
+    }
+    return best || { x: MOUTH.cx, y: MOUTH.cy };
+  }
+
+  function onMove(ev){
+    var r = face.getBoundingClientRect();
+    S = r.width;
+    var cx = ev.clientX - r.left, cy = ev.clientY - r.top;
+    var mx = S * MOUTH.cx + pos.x, my = S * MOUTH.cy + pos.y;
+    var dx = cx - mx, dy = cy - my;
+    var d = Math.hypot(dx, dy) || 1;
+    var step = Math.min(d, S * MAXTRAVEL) / S;  // travel as a fraction of the face
+
+    // Aim the mouth at the cursor and move it toward the cursor.
+    var p = resolve(MOUTH.cx + dx / d * step, MOUTH.cy + dy / d * step);
+    target = {
+      x: (p.x - MOUTH.cx) * S,
+      y: (p.y - MOUTH.cy) * S,
+      a: Math.atan2(cy - my, cx - mx) * 180 / Math.PI,
+      s: 1, o: 1
+    };
+
+    // Wink the eye closest to the cursor.
+    var dl = Math.hypot(cx - S * eyes[0].cx, cy - S * eyes[0].cy);
+    var dr = Math.hypot(cx - S * eyes[1].cx, cy - S * eyes[1].cy);
+    eyes[0].el.classList.toggle("wink", dl <= dr);
+    eyes[1].el.classList.toggle("wink", dl > dr);
+
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  function tick(){
+    var t = target || REST;
+    pos.x += (t.x - pos.x) * 0.22;
+    pos.y += (t.y - pos.y) * 0.22;
+    ang += shortest(t.a - ang) * 0.2;
+    scl += (t.s - scl) * 0.25;
+    op += (t.o - op) * 0.3;
+
+    // Re-apply the limits after each step, so the eased path never crosses an eye.
+    var p = resolve(MOUTH.cx + pos.x / S, MOUTH.cy + pos.y / S);
+    pos.x = (p.x - MOUTH.cx) * S;
+    pos.y = (p.y - MOUTH.cy) * S;
+
+    mouth.style.transform = "translate(" + pos.x.toFixed(2) + "px," +
+      pos.y.toFixed(2) + "px) rotate(" + ang.toFixed(2) +
+      "deg) scale(" + scl.toFixed(3) + ")";
+    mouth.style.opacity = op.toFixed(3);
+
+    var done = Math.abs(t.x - pos.x) < 0.05 && Math.abs(t.y - pos.y) < 0.05 &&
+      Math.abs(shortest(t.a - ang)) < 0.05 && Math.abs(t.s - scl) < 0.001 &&
+      Math.abs(t.o - op) < 0.002;
+    if (done){
+      pos.x = t.x; pos.y = t.y; ang = t.a; scl = t.s; op = t.o;
+      mouth.style.transform = "translate(" + pos.x.toFixed(2) + "px," +
+        pos.y.toFixed(2) + "px) rotate(" + ang.toFixed(2) +
+        "deg) scale(" + scl.toFixed(3) + ")";
+      mouth.style.opacity = op.toFixed(3);
+      raf = 0;
+      return;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
+  wrap.addEventListener("pointerenter", onMove);
+  wrap.addEventListener("pointermove", onMove);
+  wrap.addEventListener("pointerleave", function(){
+    target = REST;
+    eyes[0].el.classList.remove("wink");
+    eyes[1].el.classList.remove("wink");
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+})();
+// test mode: walk every registered screen, then report
+function runTests(){
+  const lines=[];let ok=0;
+  for(const e of REG.list){
+    go(e.b,e.sub);
+    try{e.check();ok++;}catch(err){lines.push("SITE-FAIL "+e.id+": "+err.message);}
+  }
+  const sw=document.documentElement.scrollWidth;
+  if(sw>window.innerWidth+1)lines.push("SITE-FAIL overflow: scrollWidth "+sw+" > innerWidth "+window.innerWidth);
+  if(hashOf("3",1)!=="#3/1")lines.push("SITE-FAIL hashOf: "+hashOf("3",1));
+  const p1=parseHash("#3/1");
+  if(p1.b!=="3"||p1.sub!==1)lines.push("SITE-FAIL parseHash #3/1 -> "+JSON.stringify(p1));
+  const p2=parseHash("#x/9");
+  if(p2.b!=="00"||p2.sub!==0)lines.push("SITE-FAIL parseHash malformed -> "+JSON.stringify(p2));
+  const rep=document.createElement("pre");
+  rep.id="test-report";
+  rep.textContent=lines.length?lines.join("\n"):"SITE-PASS "+ok+"/"+REG.list.length;
+  document.body.appendChild(rep);
+  if(location.search.includes("z=")){const z=location.search.match(/z=([\w-]+)/)[1];go("3",2);if(z!=="all")document.querySelector('#sk-map .skm[data-sec="'+z+'"]').click();}
+}
+if(TEST)runTests();
+</script>
+</body>
+</html>
