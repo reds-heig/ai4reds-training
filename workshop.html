@@ -30,6 +30,9 @@ h1{font-size:27px;margin:6px 0 10px;letter-spacing:-.01em}
 .pill{display:inline-block;font-size:13px;color:var(--muted);border:1px solid var(--border);
   border-radius:999px;padding:5px 14px;background:color-mix(in srgb, var(--card) 60%, transparent)}
 .pill b{color:var(--fg);font-weight:600}
+.pill.deck{margin-top:10px}
+.pill.deck a{color:var(--indigo);font-weight:600;text-decoration:none}
+.pill.deck a:hover{text-decoration:underline}
 .tabs{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
 .tab{padding:8px 15px;border-radius:999px;border:1px solid var(--border);background:transparent;
   color:var(--muted);cursor:pointer;font-size:13.5px;font-family:inherit}
@@ -208,6 +211,7 @@ svg{display:block;width:100%;height:auto}
   <div class="eyebrow">AI4REDS &middot; workshop companion &middot; 01-intro</div>
   <h1>How Ernesto works</h1>
   <div class="pill">The model <b>proposes</b>. The harness <b>executes</b>. The context is the memory &mdash; and it is <b>finite</b>.</div>
+  <div class="pill deck">The session runs the <a href="workshop/" target="_blank">workshop deck</a>, the live version of these notes.</div>
 </header>
 
 <nav class="tabs" id="tabs">
