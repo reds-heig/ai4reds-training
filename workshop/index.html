@@ -108,15 +108,24 @@ h2{font-size:36px;margin:0 0 4px}
 /* wrap-up: wink screenshot centered, quote, two links */
 #s-5-1.on{display:flex;flex-direction:column;justify-content:center}
 /* the title-slide face, frozen in the wink/kiss pose: no JS, no motion */
-#wu-ernesto{width:280px;height:280px;margin:14px auto 0;animation:none;opacity:0;transition:opacity .4s}
+#wu-ernesto{width:240px;height:240px;margin:12px auto 0;animation:none;opacity:0;transition:opacity .4s}
 #wu-ernesto.show{opacity:1}
 #wu-ernesto .er-glow{animation:none}
 #wu-ernesto .eye{animation:none}
 #wu-ernesto .er-mouth{opacity:1;transform:translate(34px,12px) rotate(28deg) scale(1.35)}
-.wu-quote{font-size:26px;text-align:center;margin:18px auto 14px;max-width:860px;opacity:0;transition:opacity .4s}
+.wu-quote{font-size:26px;text-align:center;margin:16px auto 12px;max-width:860px;opacity:0;transition:opacity .4s}
 .wu-quote.show{opacity:1}
 .wu-links{display:flex;gap:14px;justify-content:center;opacity:0;transition:opacity .4s}
 .wu-links.show{opacity:1}
+.wu-contact{margin-top:24px;text-align:center;opacity:0;transition:opacity .4s}
+.wu-contact.show{opacity:1}
+.wu-contact .lbl{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.wu-team{display:flex;justify-content:center;gap:16px 44px;flex-wrap:wrap}
+.wu-team .person{display:flex;flex-direction:column;align-items:center;gap:3px}
+.wu-team a{font-size:15px;color:var(--muted);text-decoration:none;transition:color .2s}
+.wu-team a:hover{color:var(--fg)}
+.wu-team .role{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.7}
+.wu-inst{margin-top:16px;font-size:12.5px;letter-spacing:.06em;color:var(--muted);opacity:.75}
 .uc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.85fr);gap:16px;align-items:start}
 .ucfig{margin:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .ucfig img{display:block;width:100%;height:auto;aspect-ratio:1200/675}
@@ -592,6 +601,16 @@ svg{display:block;width:100%;height:auto}
     <div class="wu-links">
       <a id="lk-5-gitlab" class="bink primary" href="https://reds-gitlab.heig-vd.ch/reds-general/ai4reds" target="_blank">ReDS GitLab for Ernesto</a>
       <a id="lk-5-showcase" class="bink primary" href="https://reds-heig.github.io/ai4reds-training/" target="_blank">Ernesto's showcase page</a>
+    </div>
+    <div class="wu-contact" id="wu-contact">
+      <div class="lbl">Contact</div>
+      <div class="wu-team">
+        <div class="person"><a href="mailto:mehdi.akeddar@heig-vd.ch">Mehdi Akeddar</a><span class="role">AI Engineer</span></div>
+        <div class="person"><a href="mailto:guillaume.chacun@heig-vd.ch">Guillaume Chacun</a><span class="role">AI Engineer</span></div>
+        <div class="person"><a href="mailto:yorick.brunet@heig-vd.ch">Yorick Brunet</a><span class="role">DevOps Engineer</span></div>
+        <div class="person"><a href="mailto:marina.zapater@heig-vd.ch">Marina Zapater</a><span class="role">Professor</span></div>
+      </div>
+      <div class="wu-inst">Ernesto &middot; REDS Institute &middot; HEIG-VD</div>
     </div>
   </section>
   <section class="screen h0" id="s-0-1">
@@ -1327,6 +1346,13 @@ REG.screen({
     const want={"lk-5-gitlab":"https://reds-gitlab.heig-vd.ch/reds-general/ai4reds","lk-5-showcase":"https://reds-heig.github.io/ai4reds-training/"};
     for(const id in want){const a=document.getElementById(id);if(!a||a.getAttribute("href")!==want[id]||a.target!=="_blank")throw new Error(id+" wrong");}
     if(document.querySelector("#s-5-1 .openq"))throw new Error("open-questions block still present");
+    const team=[...document.querySelectorAll("#s-5-1 .wu-team .person")];
+    const want5=[["Mehdi Akeddar","mehdi.akeddar@heig-vd.ch"],["Guillaume Chacun","guillaume.chacun@heig-vd.ch"],["Yorick Brunet","yorick.brunet@heig-vd.ch"],["Marina Zapater","marina.zapater@heig-vd.ch"]];
+    if(team.length!==4)throw new Error("team count "+team.length);
+    team.forEach((p,i)=>{const a=p.querySelector("a");
+      if(!a||a.textContent!==want5[i][0]||a.getAttribute("href")!=="mailto:"+want5[i][1])throw new Error("person "+i+" wrong");});
+    const inst=document.querySelector("#s-5-1 .wu-inst");
+    if(!inst||!inst.textContent.includes("REDS Institute"))throw new Error("wu-inst wrong");
     fit("s-5-1");
   }
 });
@@ -1419,7 +1445,7 @@ REG.list.find(s=>s.id==="s-3-3").play=(function(){
 function wrapPlay(){
   const sec=document.getElementById("s-5-1");
   return ()=>{
-    const items=[...sec.querySelectorAll("#wu-ernesto,.wu-quote,.wu-links")];
+    const items=[...sec.querySelectorAll("#wu-ernesto,.wu-quote,.wu-links,#wu-contact")];
     items.forEach(i=>i.classList.remove("show"));
     const steps=[];
     items.forEach((i,i2)=>steps.push({t:i2?250:0,fn:()=>i.classList.add("show")}));
